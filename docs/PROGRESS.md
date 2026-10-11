@@ -5,30 +5,36 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 ## Current status
 
 - Phase: 0 (Setup)
-- Current step: P0-S01 (not started)
-- Last completed step: none
-- Last updated: (date)
+- Current step: P0-S02 (not started)
+- Last completed step: P0-S01
+- Last updated: 2026-10-11
 
-## Environment facts (fill in at P0)
+## Environment facts
 
-- OS: 
-- Editor: 
-- Node.js / pnpm: 
-- Python / uv: 
-- Docker: 
-- Git remote: 
+- OS: Fedora Linux
+- Editor: (fill in your editor)
+- Node.js: v22.23.1
+- pnpm: 12.11.2
+- Python: 3.14.7
+- uv: 0.13.0
+- Docker: 29.8.2 / Compose v5.5.1
+- Git: 2.55.0
+- Git remote: https://github.com/Ali0678/RepoAtlas.git
+
+## Working preferences
+
+- Ali writes all files and runs all commands himself. The AI provides code and commands as text only. Do not create files or run commands in the repo unless Ali specifically asks.
+- Each step ends with a "Version control" block listing the exact git commands to commit and push.
 
 ## Completed steps
 
 | Step | Date | Summary (1 line) | Commit |
 |---|---|---|---|
-| | | | |
+| P0-S01 | 2026-10-11 | Repo skeleton, .gitignore, .editorconfig, .env.example, installed pnpm and uv | bb0fdb6 |
 
 ## Decisions made since the last update
 
-Reference ADR numbers from `DECISIONS.md`. Example: "ADR-013: chose X over Y."
-
-- none
+- none (no new ADRs this step)
 
 ## Open questions
 

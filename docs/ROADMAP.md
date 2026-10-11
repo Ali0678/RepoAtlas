@@ -12,7 +12,7 @@ Legend: `[ ]` not started, `[~]` in progress, `[x]` done.
 
 ## Phase 0: Setup (about 2 days)
 
-- [ ] **P0-S01 Repo and tooling**
+- [x] **P0-S01 Repo and tooling**
   Init git repo, folder layout from `STACK.md`, `.gitignore`, `.editorconfig`, README stub, copy the docs.
   DoD: tree matches `STACK.md`, first commit made.
 - [ ] **P0-S02 Next.js scaffold**

@@ -165,15 +165,15 @@ API_ORIGIN=http://localhost:8000
 
 | Tool | Version | Recorded in step |
 |---|---|---|
-| Node.js | | |
-| pnpm | | |
+| Node.js | 22.23.1 | P0-S01 |
+| pnpm | 12.11.2 | P0-S01 |
 | Next.js | | |
 | React | | |
 | Tailwind CSS | | |
 | sigma | | |
 | graphology | | |
-| Python | | |
-| uv | | |
+| Python | 3.14.7 | P0-S01 |
+| uv | 0.13.0 | P0-S01 |
 | FastAPI | | |
 | Pydantic | | |
 | SQLAlchemy | | |
