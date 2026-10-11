@@ -1,0 +1,23 @@
+# EditorConfig: https://editorconfig.org
+# Editors that support it (VS Code, JetBrains, vim with plugin)
+# read this file and apply the settings automatically.
+
+root = true
+
+# Defaults for all files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Python: community standard is 4-space indent (PEP 8)
+[*.py]
+indent_size = 4
+
+# Markdown: trailing whitespace can be meaningful (line break),
+# so do not trim it
+[*.md]
+trim_trailing_whitespace = false
