@@ -26,7 +26,7 @@ Legend: `[ ]` not started, `[~]` in progress, `[x]` done.
 
 Teach in this phase: React fundamentals as needed, hooks, TypeScript types, component composition, Zustand, TanStack Query, sigma.js and graphology, Web Workers.
 
-- [ ] **P1-S01 Graph types and mock data**
+- [x] **P1-S01 Graph types and mock data**
   Define `GraphNode`, `GraphEdge`, `RepoGraph`. Write a generator script and produce a mock graph of about 150 nodes in 6 clusters.
   DoD: typed mock JSON loads, a data-access function `getGraph(id)` returns it.
 - [ ] **P1-S02 Landing page**

@@ -4,10 +4,37 @@ import * as React from "react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
-import { Panel, PanelHeader, PanelContent, PanelFooter } from "@/components/Panel";
+import { Panel, PanelHeader, PanelContent } from "@/components/Panel";
+import { getGraph } from "@/lib/api";
+import type { RepoGraph } from "@/types/graph";
 
 export default function HomePage() {
+  const [graph, setGraph] = React.useState<RepoGraph | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
   const [repoUrl, setRepoUrl] = React.useState("https://github.com/torvalds/linux");
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    getGraph("mock-linux")
+      .then((data) => {
+        if (isMounted) {
+          setGraph(data);
+          setError(null);
+        }
+      })
+      .catch((err: Error) => {
+        if (isMounted) setError(err.message);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <AppShell
@@ -17,8 +44,8 @@ export default function HomePage() {
             <span className="font-bold text-base tracking-tight text-text-primary">
               RepoAtlas
             </span>
-            <span className="rounded bg-surface-elevated px-2 py-0.5 text-xs font-mono text-text-muted border border-border-subtle">
-              Phase 0
+            <span className="rounded bg-surface-elevated px-2 py-0.5 text-xs font-mono text-accent border border-border-subtle">
+              {graph ? `${graph.stats.totalFiles} nodes` : "P1-S01"}
             </span>
           </div>
 
@@ -31,59 +58,78 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm">Docs</Button>
-            <Button variant="primary" size="sm">Analyze</Button>
+            <Button variant="primary" size="sm" isLoading={isLoading}>
+              Analyze
+            </Button>
           </div>
         </div>
       }
       sidebar={
         <Panel className="h-full rounded-none border-none">
           <PanelHeader
-            title="Design Foundation"
-            subtitle="Theme tokens & base components"
+            title="Repository Clusters"
+            subtitle={graph ? `${graph.clusters.length} architectural clusters` : "Loading..."}
           />
           <PanelContent className="space-y-4">
-            <div>
-              <p className="text-xs font-medium text-text-secondary mb-2">BUTTON VARIANTS</p>
-              <div className="flex flex-wrap gap-2">
-                <Button variant="primary" size="sm">Primary</Button>
-                <Button variant="secondary" size="sm">Secondary</Button>
-                <Button variant="ghost" size="sm">Ghost</Button>
-                <Button variant="danger" size="sm">Danger</Button>
+            {graph?.clusters.map((cluster) => (
+              <div
+                key={cluster.id}
+                className="flex items-center justify-between p-2.5 rounded-md border border-border-subtle bg-surface-elevated text-xs"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span
+                    className="w-3 h-3 rounded-full shrink-0"
+                    style={{ backgroundColor: cluster.color }}
+                  />
+                  <span className="font-medium text-text-primary">{cluster.name}</span>
+                </div>
+                <span className="font-mono text-text-muted">{cluster.nodeCount} files</span>
               </div>
-            </div>
-
-            <div>
-              <p className="text-xs font-medium text-text-secondary mb-2">INPUT WITH STATE</p>
-              <Input label="Search Symbols" placeholder="e.g. handleRequest" />
-              <div className="mt-2">
-                <Input label="Validation Example" error="Repository not found" defaultValue="invalid-url" />
-              </div>
-            </div>
-
-            <div>
-              <p className="text-xs font-medium text-text-secondary mb-1">TYPOGRAPHY</p>
-              <p className="text-xs text-text-muted">Inter UI font</p>
-              <p className="font-mono text-xs text-accent mt-1">/src/core/parser.ts:42</p>
-            </div>
+            ))}
           </PanelContent>
-          <PanelFooter>
-            <Button variant="secondary" size="sm">Reset</Button>
-            <Button variant="primary" size="sm">Save</Button>
-          </PanelFooter>
         </Panel>
       }
     >
       <div className="flex h-full w-full flex-col items-center justify-center p-8 text-center">
-        <div className="rounded-full border border-border-subtle bg-surface-elevated p-4 mb-4 text-accent">
-          <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        </div>
-        <h2 className="text-lg font-semibold text-text-primary">WebGL Graph Canvas</h2>
-        <p className="text-sm text-text-muted max-w-sm mt-1">
-          Interactive sigma.js dependency graph mounts here in Phase 1.
-        </p>
+        {isLoading ? (
+          <div className="flex flex-col items-center gap-3">
+            <span className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+            <p className="text-sm text-text-muted">Loading graph dataset...</p>
+          </div>
+        ) : error ? (
+          <p className="text-sm text-danger">{error}</p>
+        ) : graph ? (
+          <div className="flex flex-col items-center max-w-md">
+            <div className="rounded-full border border-border-subtle bg-surface-elevated p-4 mb-4 text-accent">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-text-primary">
+              {graph.repo.owner}/{graph.repo.name}
+            </h2>
+            <p className="text-xs font-mono text-text-muted mt-1">
+              Commit: {graph.repo.commitSha.slice(0, 7)}
+            </p>
+
+            <div className="grid grid-cols-3 gap-3 w-full mt-6">
+              <div className="rounded border border-border-subtle bg-surface-elevated p-3 text-center">
+                <p className="text-lg font-bold text-text-primary">{graph.stats.totalFiles}</p>
+                <p className="text-xs text-text-muted">Files</p>
+              </div>
+              <div className="rounded border border-border-subtle bg-surface-elevated p-3 text-center">
+                <p className="text-lg font-bold text-text-primary">{graph.edges.length}</p>
+                <p className="text-xs text-text-muted">Imports</p>
+              </div>
+              <div className="rounded border border-border-subtle bg-surface-elevated p-3 text-center">
+                <p className="text-lg font-bold text-text-primary">
+                  {(graph.stats.totalLoc / 1000).toFixed(1)}k
+                </p>
+                <p className="text-xs text-text-muted">LOC</p>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     </AppShell>
   );
