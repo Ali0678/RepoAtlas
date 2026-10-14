@@ -18,7 +18,7 @@ Legend: `[ ]` not started, `[~]` in progress, `[x]` done.
 - [x] **P0-S02 Next.js scaffold**
   Create `apps/web` with TypeScript strict, Tailwind, ESLint, Prettier, pnpm.
   DoD: `pnpm dev` serves a page on port 3000, lint and type-check pass. Resolved versions recorded.
-- [ ] **P0-S03 Design foundation**
+- [x] **P0-S03 Design foundation**
   Theme tokens (colors, spacing, fonts), dark theme, app shell layout, base components (Button, Input, Panel).
   DoD: shell renders with the design tokens, no hardcoded colors outside the token file.
 
