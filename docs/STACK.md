@@ -167,9 +167,9 @@ API_ORIGIN=http://localhost:8000
 |---|---|---|
 | Node.js | 22.23.1 | P0-S01 |
 | pnpm | 12.11.2 | P0-S01 |
-| Next.js | | |
-| React | | |
-| Tailwind CSS | | |
+| Next.js | 16.4.0 | P0-S02 |
+| React | 19.3.0 | P0-S02 |
+| Tailwind CSS | 4.3.3 | P0-S02 |
 | sigma | | |
 | graphology | | |
 | Python | 3.14.7 | P0-S01 |

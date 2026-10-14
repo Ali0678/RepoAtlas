@@ -5,9 +5,9 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 ## Current status
 
 - Phase: 0 (Setup)
-- Current step: P0-S02 (not started)
-- Last completed step: P0-S01
-- Last updated: 2026-10-11
+- Current step: P0-S03 (not started)
+- Last completed step: P0-S02
+- Last updated: 2026-10-14
 
 ## Environment facts
 
@@ -31,6 +31,7 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 | Step | Date | Summary (1 line) | Commit |
 |---|---|---|---|
 | P0-S01 | 2026-10-11 | Repo skeleton, .gitignore, .editorconfig, .env.example, installed pnpm and uv | bb0fdb6 |
+| P0-S02 | 2026-10-14 | Next.js 16 App Router scaffold with TypeScript strict, Tailwind v4, ESLint 9, Prettier | pending |
 
 ## Decisions made since the last update
 

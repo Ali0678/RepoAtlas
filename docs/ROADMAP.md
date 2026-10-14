@@ -15,7 +15,7 @@ Legend: `[ ]` not started, `[~]` in progress, `[x]` done.
 - [x] **P0-S01 Repo and tooling**
   Init git repo, folder layout from `STACK.md`, `.gitignore`, `.editorconfig`, README stub, copy the docs.
   DoD: tree matches `STACK.md`, first commit made.
-- [ ] **P0-S02 Next.js scaffold**
+- [x] **P0-S02 Next.js scaffold**
   Create `apps/web` with TypeScript strict, Tailwind, ESLint, Prettier, pnpm.
   DoD: `pnpm dev` serves a page on port 3000, lint and type-check pass. Resolved versions recorded.
 - [ ] **P0-S03 Design foundation**
