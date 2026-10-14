@@ -5,8 +5,8 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 ## Current status
 
 - Phase: 1 (Frontend with mock data)
-- Current step: P1-S02 (not started)
-- Last completed step: P1-S01
+- Current step: P1-S03 (not started)
+- Last completed step: P1-S02
 - Last updated: 2026-10-14
 
 ## Environment facts
@@ -33,7 +33,8 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 | P0-S01 | 2026-10-11 | Repo skeleton, .gitignore, .editorconfig, .env.example, installed pnpm and uv | bb0fdb6 |
 | P0-S02 | 2026-10-14 | Next.js 16 App Router scaffold with TypeScript strict, Tailwind v4, ESLint 9, Prettier | 51e821d |
 | P0-S03 | 2026-10-14 | Theme tokens, dark palette, AppShell layout, base components (Button, Input, Panel) | f089312 |
-| P1-S01 | 2026-10-14 | Graph types, mock graph generator (150 nodes, 6 clusters), and getGraph() async client | pending |
+| P1-S01 | 2026-10-14 | Graph types, mock graph generator (150 nodes, 6 clusters), and getGraph() async client | d759525 |
+| P1-S02 | 2026-10-14 | Responsive Landing page with hero, GitHub URL validation, and 6-card gallery | pending |
 
 ## Decisions made since the last update
 

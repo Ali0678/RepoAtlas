@@ -29,11 +29,10 @@
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 }
 
-/* Enforce dark canvas viewport defaults */
+/* Global viewport defaults */
 html,
 body {
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
   background-color: var(--color-surface-base);
   color: var(--color-text-primary);
   font-family: var(--font-sans);

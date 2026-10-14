@@ -29,7 +29,7 @@ Teach in this phase: React fundamentals as needed, hooks, TypeScript types, comp
 - [x] **P1-S01 Graph types and mock data**
   Define `GraphNode`, `GraphEdge`, `RepoGraph`. Write a generator script and produce a mock graph of about 150 nodes in 6 clusters.
   DoD: typed mock JSON loads, a data-access function `getGraph(id)` returns it.
-- [ ] **P1-S02 Landing page**
+- [x] **P1-S02 Landing page**
   Hero, repo URL input (non-functional), gallery placeholder cards.
   DoD: responsive page, input validates URL shape client-side.
 - [ ] **P1-S03 Graph canvas**

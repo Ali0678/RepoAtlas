@@ -1,136 +1,241 @@
 "use client";
 
 import * as React from "react";
-import { AppShell } from "@/components/AppShell";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
-import { Panel, PanelHeader, PanelContent } from "@/components/Panel";
-import { getGraph } from "@/lib/api";
-import type { RepoGraph } from "@/types/graph";
+import { GalleryCard, type GalleryRepo } from "@/components/GalleryCard";
+import { validateGitHubUrl } from "@/lib/validation";
 
-export default function HomePage() {
-  const [graph, setGraph] = React.useState<RepoGraph | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
-  const [repoUrl, setRepoUrl] = React.useState("https://github.com/torvalds/linux");
+const FEATURED_REPOSITORIES: GalleryRepo[] = [
+  {
+    owner: "pallets",
+    name: "flask",
+    description:
+      "A lightweight WSGI web application framework designed to make getting started quick and easy.",
+    language: "Python",
+    languageColor: "#3572A5",
+    stars: "68k",
+    files: 94,
+    clusters: 6,
+  },
+  {
+    owner: "expressjs",
+    name: "express",
+    description:
+      "Fast, unopinionated, minimalist web framework for Node.js and standard HTTP servers.",
+    language: "JavaScript",
+    languageColor: "#f1e05a",
+    stars: "64k",
+    files: 78,
+    clusters: 5,
+  },
+  {
+    owner: "fastapi",
+    name: "fastapi",
+    description:
+      "Modern, high-performance web framework for building APIs with Python based on standard type hints.",
+    language: "Python",
+    languageColor: "#3572A5",
+    stars: "77k",
+    files: 112,
+    clusters: 7,
+  },
+  {
+    owner: "astral-sh",
+    name: "uv",
+    description:
+      "An extremely fast Python package and project manager written in Rust, replacing pip and venv.",
+    language: "Rust / Python",
+    languageColor: "#dea584",
+    stars: "45k",
+    files: 160,
+    clusters: 6,
+  },
+  {
+    owner: "facebook",
+    name: "react",
+    description:
+      "The declarative, component-based library for building web and native user interfaces.",
+    language: "TypeScript",
+    languageColor: "#3178c6",
+    stars: "230k",
+    files: 150,
+    clusters: 8,
+  },
+  {
+    owner: "torvalds",
+    name: "linux",
+    description:
+      "Linux kernel source tree, subsystem drivers, virtual filesystem, and system architectures.",
+    language: "C",
+    languageColor: "#555555",
+    stars: "185k",
+    files: 150,
+    clusters: 6,
+  },
+];
 
-  React.useEffect(() => {
-    let isMounted = true;
+export default function LandingPage() {
+  const router = useRouter();
+  const [repoInput, setRepoInput] = React.useState("");
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
-    getGraph("mock-linux")
-      .then((data) => {
-        if (isMounted) {
-          setGraph(data);
-          setError(null);
-        }
-      })
-      .catch((err: Error) => {
-        if (isMounted) setError(err.message);
-      })
-      .finally(() => {
-        if (isMounted) setIsLoading(false);
-      });
+  function handleAnalyze(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    const result = validateGitHubUrl(repoInput);
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    if (!result.isValid) {
+      setErrorMessage(result.error ?? "Invalid repository URL");
+      return;
+    }
+
+    setErrorMessage(null);
+    router.push(`/explore?repo=${result.data!.owner}/${result.data!.repo}`);
+  }
 
   return (
-    <AppShell
-      header={
-        <div className="flex items-center justify-between w-full gap-4">
-          <div className="flex items-center gap-3">
-            <span className="font-bold text-base tracking-tight text-text-primary">
-              RepoAtlas
-            </span>
-            <span className="rounded bg-surface-elevated px-2 py-0.5 text-xs font-mono text-accent border border-border-subtle">
-              {graph ? `${graph.stats.totalFiles} nodes` : "P1-S01"}
-            </span>
-          </div>
+    <div className="min-h-screen bg-surface-base text-text-primary flex flex-col">
+      {/* Navigation Header */}
+      <header className="border-b border-border-subtle/80 bg-surface-panel/60 backdrop-blur sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="font-bold text-lg tracking-tight text-white">
+            RepoAtlas
+          </span>
+          <span className="text-[11px] font-mono text-text-muted bg-surface-elevated px-2 py-0.5 rounded border border-border-subtle">
+            MVP Preview
+          </span>
+        </div>
 
-          <div className="flex-1 max-w-md">
-            <Input
-              value={repoUrl}
-              onChange={(e) => setRepoUrl(e.target.value)}
-              placeholder="github.com/owner/repository"
-            />
-          </div>
+        <div className="flex items-center gap-3">
+          <Link
+            href="https://github.com/Ali0678/RepoAtlas"
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-text-secondary hover:text-white transition-colors"
+          >
+            GitHub
+          </Link>
+          <Link href="/explore">
+            <Button variant="secondary" size="sm">
+              Open Workspace
+            </Button>
+          </Link>
+        </div>
+      </header>
 
-          <div className="flex items-center gap-2">
-            <Button variant="primary" size="sm" isLoading={isLoading}>
+      {/* Hero Section */}
+      <main className="flex-1 max-w-5xl mx-auto px-6 py-16 sm:py-24 flex flex-col items-center text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border-subtle bg-surface-elevated text-xs text-text-secondary mb-6">
+          <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+          WebGL Dependency Visualization + Grounded AI Q&amp;A
+        </div>
+
+        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white max-w-3xl leading-[1.15]">
+          See any codebase as an{" "}
+          <span className="bg-gradient-to-r from-accent to-cyan-400 bg-clip-text text-transparent">
+            interactive architecture map
+          </span>
+          .
+        </h1>
+
+        <p className="mt-5 max-w-xl text-base sm:text-lg text-text-secondary leading-relaxed">
+          Transform public GitHub repositories into living, animated dependency
+          graphs. Ask architectural questions in plain English with cited files
+          highlighted directly on the map.
+        </p>
+
+        {/* URL Input Form */}
+        <form onSubmit={handleAnalyze} className="mt-8 w-full max-w-lg">
+          <div className="flex flex-col sm:flex-row items-center gap-2">
+            <div className="w-full flex-1">
+              <Input
+                value={repoInput}
+                onChange={(e) => {
+                  setRepoInput(e.target.value);
+                  if (errorMessage) setErrorMessage(null);
+                }}
+                placeholder="github.com/owner/repository"
+                error={errorMessage ?? undefined}
+              />
+            </div>
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              className="w-full sm:w-auto shrink-0"
+            >
               Analyze
             </Button>
           </div>
-        </div>
-      }
-      sidebar={
-        <Panel className="h-full rounded-none border-none">
-          <PanelHeader
-            title="Repository Clusters"
-            subtitle={graph ? `${graph.clusters.length} architectural clusters` : "Loading..."}
-          />
-          <PanelContent className="space-y-4">
-            {graph?.clusters.map((cluster) => (
-              <div
-                key={cluster.id}
-                className="flex items-center justify-between p-2.5 rounded-md border border-border-subtle bg-surface-elevated text-xs"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span
-                    className="w-3 h-3 rounded-full shrink-0"
-                    style={{ backgroundColor: cluster.color }}
-                  />
-                  <span className="font-medium text-text-primary">{cluster.name}</span>
-                </div>
-                <span className="font-mono text-text-muted">{cluster.nodeCount} files</span>
-              </div>
-            ))}
-          </PanelContent>
-        </Panel>
-      }
-    >
-      <div className="flex h-full w-full flex-col items-center justify-center p-8 text-center">
-        {isLoading ? (
-          <div className="flex flex-col items-center gap-3">
-            <span className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-            <p className="text-sm text-text-muted">Loading graph dataset...</p>
-          </div>
-        ) : error ? (
-          <p className="text-sm text-danger">{error}</p>
-        ) : graph ? (
-          <div className="flex flex-col items-center max-w-md">
-            <div className="rounded-full border border-border-subtle bg-surface-elevated p-4 mb-4 text-accent">
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <h2 className="text-xl font-bold text-text-primary">
-              {graph.repo.owner}/{graph.repo.name}
-            </h2>
-            <p className="text-xs font-mono text-text-muted mt-1">
-              Commit: {graph.repo.commitSha.slice(0, 7)}
-            </p>
+          <p className="mt-2 text-xs text-text-muted text-left">
+            Try:{" "}
+            <button
+              type="button"
+              onClick={() => setRepoInput("github.com/pallets/flask")}
+              className="text-text-secondary hover:text-accent underline cursor-pointer"
+            >
+              github.com/pallets/flask
+            </button>{" "}
+            or select a gallery card below.
+          </p>
+        </form>
 
-            <div className="grid grid-cols-3 gap-3 w-full mt-6">
-              <div className="rounded border border-border-subtle bg-surface-elevated p-3 text-center">
-                <p className="text-lg font-bold text-text-primary">{graph.stats.totalFiles}</p>
-                <p className="text-xs text-text-muted">Files</p>
-              </div>
-              <div className="rounded border border-border-subtle bg-surface-elevated p-3 text-center">
-                <p className="text-lg font-bold text-text-primary">{graph.edges.length}</p>
-                <p className="text-xs text-text-muted">Imports</p>
-              </div>
-              <div className="rounded border border-border-subtle bg-surface-elevated p-3 text-center">
-                <p className="text-lg font-bold text-text-primary">
-                  {(graph.stats.totalLoc / 1000).toFixed(1)}k
-                </p>
-                <p className="text-xs text-text-muted">LOC</p>
-              </div>
+        {/* Value proposition badges */}
+        <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-2xl text-left">
+          <div className="p-3.5 rounded-lg border border-border-subtle/80 bg-surface-panel/40">
+            <p className="text-xs font-semibold text-text-primary">
+              WebGL ForceAtlas2
+            </p>
+            <p className="text-xs text-text-muted mt-1">
+              60 fps interactive canvas clustered by module.
+            </p>
+          </div>
+          <div className="p-3.5 rounded-lg border border-border-subtle/80 bg-surface-panel/40">
+            <p className="text-xs font-semibold text-text-primary">
+              Grounded AI Q&amp;A
+            </p>
+            <p className="text-xs text-text-muted mt-1">
+              Ask questions, answers glow on the cited graph nodes.
+            </p>
+          </div>
+          <div className="p-3.5 rounded-lg border border-border-subtle/80 bg-surface-panel/40">
+            <p className="text-xs font-semibold text-text-primary">
+              Blast Radius Impact
+            </p>
+            <p className="text-xs text-text-muted mt-1">
+              Select any file to trace dependencies by depth.
+            </p>
+          </div>
+        </div>
+
+        {/* Gallery Section */}
+        <section className="mt-20 w-full text-left">
+          <div className="flex items-end justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-white tracking-tight">
+                Public Repository Gallery
+              </h2>
+              <p className="text-xs text-text-muted mt-1">
+                Explore pre-analyzed open-source projects instantly with zero
+                login required.
+              </p>
             </div>
           </div>
-        ) : null}
-      </div>
-    </AppShell>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {FEATURED_REPOSITORIES.map((repo) => (
+              <GalleryCard key={`${repo.owner}/${repo.name}`} repo={repo} />
+            ))}
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border-subtle/60 py-8 px-6 text-center text-xs text-text-muted">
+        RepoAtlas • Computer Science Portfolio Project • Open Source
+      </footer>
+    </div>
   );
 }
