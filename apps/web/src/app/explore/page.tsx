@@ -132,6 +132,10 @@ function ExploreContent() {
                     {(graph.stats.totalLoc / 1000).toFixed(1)}k
                   </span>
                 </div>
+                <div className="flex justify-between text-xs text-text-secondary">
+                  <span>Physics Engine</span>
+                  <span className="font-mono text-accent text-[11px]">ForceAtlas2 (Worker)</span>
+                </div>
               </div>
             ) : null}
           </PanelContent>

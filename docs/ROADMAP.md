@@ -35,7 +35,7 @@ Teach in this phase: React fundamentals as needed, hooks, TypeScript types, comp
 - [x] **P1-S03 Graph canvas**
   Render nodes and edges with sigma and graphology from the mock data.
   DoD: graph visible, zoom and pan work.
-- [ ] **P1-S04 Layout and clusters**
+- [x] **P1-S04 Layout and clusters**
   ForceAtlas2 in a Web Worker, node color by cluster, node size by LOC.
   DoD: layout converges without freezing the UI, clusters visually distinct.
 - [ ] **P1-S05 Interaction**
