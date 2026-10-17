@@ -170,8 +170,8 @@ API_ORIGIN=http://localhost:8000
 | Next.js | 16.4.0 | P0-S02 |
 | React | 19.3.0 | P0-S02 |
 | Tailwind CSS | 4.3.3 | P0-S02 |
-| sigma | | |
-| graphology | | |
+| sigma | 3.0.3 | P1-S03 |
+| graphology | 0.26.0 | P1-S03 |
 | Python | 3.14.7 | P0-S01 |
 | uv | 0.13.0 | P0-S01 |
 | FastAPI | | |

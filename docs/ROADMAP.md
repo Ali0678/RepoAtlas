@@ -32,7 +32,7 @@ Teach in this phase: React fundamentals as needed, hooks, TypeScript types, comp
 - [x] **P1-S02 Landing page**
   Hero, repo URL input (non-functional), gallery placeholder cards.
   DoD: responsive page, input validates URL shape client-side.
-- [ ] **P1-S03 Graph canvas**
+- [x] **P1-S03 Graph canvas**
   Render nodes and edges with sigma and graphology from the mock data.
   DoD: graph visible, zoom and pan work.
 - [ ] **P1-S04 Layout and clusters**
