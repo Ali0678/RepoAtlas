@@ -173,6 +173,7 @@ API_ORIGIN=http://localhost:8000
 | sigma | 3.0.3 | P1-S03 |
 | graphology | 0.26.0 | P1-S03 |
 | graphology-layout-forceatlas2 | 0.10.1 | P1-S04 |
+| zustand | 5.0.3 | P1-S05 |
 | Python | 3.14.7 | P0-S01 |
 | uv | 0.13.0 | P0-S01 |
 | FastAPI | | |

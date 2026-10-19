@@ -38,7 +38,7 @@ Teach in this phase: React fundamentals as needed, hooks, TypeScript types, comp
 - [x] **P1-S04 Layout and clusters**
   ForceAtlas2 in a Web Worker, node color by cluster, node size by LOC.
   DoD: layout converges without freezing the UI, clusters visually distinct.
-- [ ] **P1-S05 Interaction**
+- [x] **P1-S05 Interaction**
   Hover highlight, click select, camera animation to selected node, store-driven reducers.
   DoD: hover and select update through the Zustand store and reducers, no full re-render of the graph.
 - [ ] **P1-S06 Details panel**

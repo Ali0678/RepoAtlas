@@ -5,9 +5,9 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 ## Current status
 
 - Phase: 1 (Frontend with mock data)
-- Current step: P1-S05 (not started)
-- Last completed step: P1-S04
-- Last updated: 2026-10-17
+- Current step: P1-S06 (not started)
+- Last completed step: P1-S05
+- Last updated: 2026-10-19
 
 ## Environment facts
 
@@ -36,7 +36,8 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 | P1-S01 | 2026-10-14 | Graph types, mock graph generator (150 nodes, 6 clusters), and getGraph() async client | d759525 |
 | P1-S02 | 2026-10-14 | Responsive Landing page with hero, GitHub URL validation, and 6-card gallery | a92d043 |
 | P1-S03 | 2026-10-17 | WebGL graph canvas with sigma.js, graphology, zoom/pan camera controls, and cleanup | c92a174 |
-| P1-S04 | 2026-10-17 | ForceAtlas2 in Web Worker, log2 LOC node sizing, smooth damping, and play/pause | pending |
+| P1-S04 | 2026-10-17 | ForceAtlas2 in Web Worker, log2 LOC node sizing, smooth damping, and play/pause | e749b10 |
+| P1-S05 | 2026-10-19 | Hover/selection reducers, 1-hop neighbor highlighting, camera gliding, Zustand store | pending |
 
 ## Decisions made since the last update
 

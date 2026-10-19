@@ -4,6 +4,7 @@ import * as React from "react";
 import Sigma from "sigma";
 import FA2Layout from "graphology-layout-forceatlas2/worker";
 import { createGraphologyFromRepo } from "../lib/graphologyAdapter";
+import { useGraphStore } from "@/store/useGraphStore";
 import type { RepoGraph } from "@/types/graph";
 
 export interface GraphCanvasProps {
@@ -16,6 +17,8 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
   const sigmaRef = React.useRef<Sigma | null>(null);
   const layoutRef = React.useRef<FA2Layout | null>(null);
   const [isLayoutRunning, setIsLayoutRunning] = React.useState(true);
+
+  const selectedNodeId = useGraphStore((s) => s.selectedNodeId);
 
   React.useEffect(() => {
     if (!containerRef.current || !data) return;
@@ -40,15 +43,108 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
 
     sigmaRef.current = renderer;
 
-    // 3. Initialize ForceAtlas2 Web Worker supervisor with smooth damping
+    // 3. Register Sigma visual reducers for hover and selection highlighting
+    renderer.setSetting("nodeReducer", (node, nodeData) => {
+      const state = useGraphStore.getState();
+      const activeNode = state.hoveredNodeId || state.selectedNodeId;
+      const activeNeighbors = state.hoveredNodeId
+        ? state.hoveredNeighbors
+        : state.selectedNeighbors;
+
+      if (!activeNode) return nodeData;
+
+      if (node === activeNode) {
+        return {
+          ...nodeData,
+          highlighted: true,
+          zIndex: 10,
+          size: nodeData.size * 1.3,
+        };
+      }
+
+      if (activeNeighbors.has(node)) {
+        return {
+          ...nodeData,
+          highlighted: false,
+          zIndex: 5,
+        };
+      }
+
+      // Dim non-neighbor nodes
+      return {
+        ...nodeData,
+        color: "#18191e",
+        label: "",
+        zIndex: 1,
+      };
+    });
+
+    renderer.setSetting("edgeReducer", (edge, edgeData) => {
+      const state = useGraphStore.getState();
+      const activeNode = state.hoveredNodeId || state.selectedNodeId;
+
+      if (!activeNode) return edgeData;
+
+      const extremes = graph.extremities(edge);
+      const isConnected =
+        extremes[0] === activeNode || extremes[1] === activeNode;
+
+      if (isConnected) {
+        return {
+          ...edgeData,
+          color: "#3b82f6",
+          size: Math.max(1.8, edgeData.size * 1.8),
+          zIndex: 10,
+        };
+      }
+
+      // Hide edges not connected to active node
+      return {
+        ...edgeData,
+        hidden: true,
+      };
+    });
+
+    // 4. Register pointer interaction events
+    renderer.on("enterNode", ({ node }) => {
+      const neighbors = graph.neighbors(node);
+      useGraphStore.getState().setHoveredNodeId(node, neighbors);
+      renderer.refresh();
+    });
+
+    renderer.on("leaveNode", () => {
+      useGraphStore.getState().resetHover();
+      renderer.refresh();
+    });
+
+    renderer.on("clickNode", ({ node }) => {
+      const neighbors = graph.neighbors(node);
+      useGraphStore.getState().setSelectedNodeId(node, neighbors);
+
+      const nodePosition = renderer.getNodeDisplayData(node);
+      if (nodePosition) {
+        renderer.getCamera().animate(
+          { x: nodePosition.x, y: nodePosition.y, ratio: 0.18 },
+          { duration: 450 }
+        );
+      }
+      renderer.refresh();
+    });
+
+    renderer.on("clickStage", () => {
+      useGraphStore.getState().clearSelection();
+      renderer.refresh();
+    });
+
+    // 5. Initialize ForceAtlas2 Web Worker supervisor
     const layout = new FA2Layout(graph, {
       settings: {
         gravity: 1.0,
         scalingRatio: 12,
         barnesHutOptimize: true,
         barnesHutTheta: 0.6,
-        slowDown: 8, // Damps velocity to eliminate shivering and overshooting
-        adjustSizes: true, // Prevents node overlap jitter
+        slowDown: 8,
+        adjustSizes: true,
       },
     });
 
@@ -56,7 +152,6 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
     layout.start();
     setIsLayoutRunning(true);
 
-    // 4. Auto-stop after 4.0 seconds once layout reaches smooth equilibrium
     const autoStopTimer = setTimeout(() => {
       if (layout.isRunning()) {
         layout.stop();
@@ -64,7 +159,7 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
       }
     }, 4000);
 
-    // 5. Cleanup on unmount: kill both worker and WebGL renderer
+    // 6. Cleanup on unmount
     return () => {
       clearTimeout(autoStopTimer);
       layout.stop();
@@ -74,6 +169,21 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
       sigmaRef.current = null;
     };
   }, [data]);
+
+  // Sync camera when selectedNodeId changes externally (e.g. from sidebar navigation)
+  React.useEffect(() => {
+    const renderer = sigmaRef.current;
+    if (!renderer || !selectedNodeId) return;
+
+    const nodePosition = renderer.getNodeDisplayData(selectedNodeId);
+    if (nodePosition) {
+      renderer.getCamera().animate(
+        { x: nodePosition.x, y: nodePosition.y, ratio: 0.18 },
+        { duration: 450 }
+      );
+    }
+    renderer.refresh();
+  }, [selectedNodeId]);
 
   function handleZoomIn() {
     sigmaRef.current?.getCamera().animatedZoom({ duration: 250 });
@@ -111,7 +221,6 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
 
       {/* Floating Layout & Camera Controls */}
       <div className="absolute bottom-5 right-5 z-20 flex flex-col gap-1.5 rounded-lg border border-border-subtle bg-surface-panel/90 p-1.5 shadow-xl backdrop-blur select-none">
-        {/* ForceAtlas2 Worker Simulation Toggle */}
         <button
           type="button"
           onClick={toggleLayout}
@@ -134,7 +243,6 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
 
         <div className="h-px bg-border-subtle/80 my-0.5" />
 
-        {/* Camera Zoom In */}
         <button
           type="button"
           onClick={handleZoomIn}
@@ -146,7 +254,6 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
           </svg>
         </button>
 
-        {/* Camera Zoom Out */}
         <button
           type="button"
           onClick={handleZoomOut}
@@ -158,7 +265,6 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
           </svg>
         </button>
 
-        {/* Camera Center Reset */}
         <button
           type="button"
           onClick={handleResetCamera}
