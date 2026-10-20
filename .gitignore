@@ -16,6 +16,7 @@ node_modules/
 # ========================
 .next/
 out/
+*.tsbuildinfo
 
 # ========================
 # Python
@@ -66,3 +67,8 @@ docker-volumes/
 *~
 .DS_Store
 Thumbs.db
+
+# ========================
+# Command Code agent state
+# ========================
+.commandcode/
