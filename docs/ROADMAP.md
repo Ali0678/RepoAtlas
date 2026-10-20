@@ -41,7 +41,7 @@ Teach in this phase: React fundamentals as needed, hooks, TypeScript types, comp
 - [x] **P1-S05 Interaction**
   Hover highlight, click select, camera animation to selected node, store-driven reducers.
   DoD: hover and select update through the Zustand store and reducers, no full re-render of the graph.
-- [ ] **P1-S06 Details panel**
+- [x] **P1-S06 Details panel**
   Side panel showing file path, language, LOC, symbols, neighbors.
   DoD: panel follows selection, neighbor click navigates.
 - [ ] **P1-S07 Search and filters**
