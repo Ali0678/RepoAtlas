@@ -4,6 +4,12 @@ import * as React from "react";
 import Sigma from "sigma";
 import FA2Layout from "graphology-layout-forceatlas2/worker";
 import { createGraphologyFromRepo } from "../lib/graphologyAdapter";
+import {
+  FLOW_SPEED_PER_MS,
+  interpolateColor,
+  phaseOffsetFor,
+  pulseIntensity,
+} from "../lib/visualPolish";
 import { useGraphStore } from "@/store/useGraphStore";
 import type { RepoGraph } from "@/types/graph";
 
@@ -12,13 +18,25 @@ export interface GraphCanvasProps {
   className?: string;
 }
 
+// Edge flow colors: pulse between a deep blue and a bright highlight.
+const EDGE_FLOW_BASE = "#1e40af";
+const EDGE_FLOW_PEAK = "#93c5fd";
+// Active node pulses toward a pale blue, keeping cluster color visible.
+const NODE_GLOW_TARGET = "#dbeafe";
+
 export function GraphCanvas({ data, className }: GraphCanvasProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const sigmaRef = React.useRef<Sigma | null>(null);
   const layoutRef = React.useRef<FA2Layout | null>(null);
   const [isLayoutRunning, setIsLayoutRunning] = React.useState(true);
+  const [fps, setFps] = React.useState<number | null>(null);
+
+  // Animation clock shared with the reducers. A ref, not state: the value
+  // changes every frame and must never re-render React.
+  const flowPhaseRef = React.useRef(0);
 
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId);
+  const hoveredNodeId = useGraphStore((s) => s.hoveredNodeId);
   const matchingNodeIds = useGraphStore((s) => s.matchingNodeIds);
 
   React.useEffect(() => {
@@ -27,7 +45,11 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
     // 1. Build the validated graphology graph
     const graph = createGraphologyFromRepo(data);
 
-    // 2. Instantiate Sigma WebGL renderer
+    // 2. Instantiate Sigma WebGL renderer.
+    // labelRenderedSizeThreshold: sigma hides labels of nodes whose
+    // on-screen size (node size / sqrt(camera ratio)) falls below this.
+    // Zooming in lowers the ratio, grows on-screen sizes, and reveals
+    // labels progressively without any custom camera listener.
     const renderer = new Sigma(graph, containerRef.current, {
       renderEdgeLabels: false,
       minCameraRatio: 0.05,
@@ -38,6 +60,7 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
       labelColor: { color: "#f4f4f5" },
       labelSize: 11,
       labelWeight: "500",
+      labelRenderedSizeThreshold: 10,
       enableEdgeEvents: false,
       allowInvalidContainer: true,
     });
@@ -67,12 +90,18 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
 
       if (!activeNode) return nodeData;
 
+      // Hover pulses at half strength so selection reads as stronger.
+      const amplitude = state.hoveredNodeId ? 0.5 : 1;
+
       if (node === activeNode) {
+        const glow = pulseIntensity(flowPhaseRef.current) * amplitude;
         return {
           ...nodeData,
           highlighted: true,
           zIndex: 10,
-          size: nodeData.size * 1.3,
+          size: nodeData.size * (1.3 + 0.3 * glow),
+          color: interpolateColor(nodeData.color, NODE_GLOW_TARGET, 0.4 * glow),
+          forceLabel: true,
         };
       }
 
@@ -81,6 +110,7 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
           ...nodeData,
           highlighted: false,
           zIndex: 5,
+          forceLabel: true,
         };
       }
 
@@ -113,10 +143,15 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
       const isConnected = source === activeNode || target === activeNode;
 
       if (isConnected) {
+        // Per-edge phase offset makes each edge pulse on its own rhythm,
+        // reading as energy moving through the neighborhood.
+        const amplitude = state.hoveredNodeId ? 0.5 : 1;
+        const flow =
+          pulseIntensity(flowPhaseRef.current, phaseOffsetFor(edge)) * amplitude;
         return {
           ...edgeData,
-          color: "#3b82f6",
-          size: Math.max(1.8, edgeData.size * 1.8),
+          color: interpolateColor(EDGE_FLOW_BASE, EDGE_FLOW_PEAK, flow),
+          size: Math.max(1.8, edgeData.size * 1.5 + 1.6 * flow),
           zIndex: 10,
         };
       }
@@ -215,6 +250,60 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
     sigmaRef.current?.refresh();
   }, [matchingNodeIds]);
 
+  // Edge flow animation loop. Runs only while something is hovered or
+  // selected: each frame advances the shared clock by the real elapsed time
+  // (frame-rate independent) and refreshes so the reducers re-evaluate with
+  // the new phase. Cleanup cancels the loop on unmount or state change, and
+  // one final refresh when the loop stops repaints the static end state.
+  React.useEffect(() => {
+    const renderer = sigmaRef.current;
+    if (!renderer) return;
+
+    if (!hoveredNodeId && !selectedNodeId) {
+      renderer.refresh();
+      return;
+    }
+
+    let frameId = 0;
+    let last = performance.now();
+
+    const tick = (now: number) => {
+      flowPhaseRef.current += (now - last) * FLOW_SPEED_PER_MS;
+      last = now;
+      renderer.refresh();
+      frameId = requestAnimationFrame(tick);
+    };
+
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
+  }, [hoveredNodeId, selectedNodeId]);
+
+  // Dev-only FPS meter: sigma emits beforeRender on every render pass.
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    const renderer = sigmaRef.current;
+    if (!renderer) return;
+
+    let frames = 0;
+    let windowStart = performance.now();
+
+    const handleBeforeRender = () => {
+      frames += 1;
+      const now = performance.now();
+      const elapsed = now - windowStart;
+      if (elapsed >= 500) {
+        setFps(Math.round((frames * 1000) / elapsed));
+        frames = 0;
+        windowStart = now;
+      }
+    };
+
+    renderer.on("beforeRender", handleBeforeRender);
+    return () => {
+      renderer.off("beforeRender", handleBeforeRender);
+    };
+  }, [data]);
+
   function handleZoomIn() {
     sigmaRef.current?.getCamera().animatedZoom({ duration: 250 });
   }
@@ -248,6 +337,13 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
     >
       {/* WebGL Canvas Target */}
       <div ref={containerRef} className="w-full h-full" />
+
+      {/* Dev-only FPS meter */}
+      {fps !== null ? (
+        <div className="pointer-events-none absolute bottom-5 left-5 z-20 rounded border border-border-subtle bg-surface-panel/90 px-2 py-1 font-mono text-[11px] text-text-muted">
+          {fps} fps
+        </div>
+      ) : null}
 
       {/* Floating Layout & Camera Controls */}
       <div className="absolute bottom-5 right-5 z-20 flex flex-col gap-1.5 rounded-lg border border-border-subtle bg-surface-panel/90 p-1.5 shadow-xl backdrop-blur select-none">
