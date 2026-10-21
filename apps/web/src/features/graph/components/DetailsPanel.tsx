@@ -175,7 +175,7 @@ export function DetailsPanel({
   return (
     <div
       className={cn(
-        "flex flex-col h-full bg-surface-panel text-text-primary select-none overflow-hidden",
+        "flex min-h-0 flex-1 flex-col bg-surface-panel text-text-primary select-none overflow-hidden",
         className
       )}
     >

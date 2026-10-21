@@ -9,6 +9,8 @@ import { Input } from "@/components/Input";
 import { Panel, PanelHeader, PanelContent } from "@/components/Panel";
 import { GraphCanvas } from "@/features/graph/components/GraphCanvas";
 import { DetailsPanel } from "@/features/graph/components/DetailsPanel";
+import { SearchFilterBar } from "@/features/graph/components/SearchFilterBar";
+import { computeMatchingNodeIds } from "@/features/graph/lib/graphFilters";
 import { useGraphStore } from "@/store/useGraphStore";
 import { getGraph } from "@/lib/api";
 import type { RepoGraph, GraphNode } from "@/types/graph";
@@ -25,6 +27,11 @@ function ExploreContent() {
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId);
   const clearSelection = useGraphStore((s) => s.clearSelection);
   const setSelectedNodeId = useGraphStore((s) => s.setSelectedNodeId);
+
+  const searchQuery = useGraphStore((s) => s.searchQuery);
+  const clusterFilter = useGraphStore((s) => s.clusterFilter);
+  const languageFilter = useGraphStore((s) => s.languageFilter);
+  const setMatchingNodeIds = useGraphStore((s) => s.setMatchingNodeIds);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -58,6 +65,23 @@ function ExploreContent() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedNodeId, clearSelection]);
+
+  // Derived state: the match set is a pure function of nodes + filters.
+  // Computed here with useMemo, then synced into the store once, because
+  // the sigma reducers inside GraphCanvas read it via getState().
+  const matchingNodeIds = React.useMemo(
+    () =>
+      computeMatchingNodeIds(graph?.nodes ?? [], {
+        query: searchQuery,
+        clusters: clusterFilter,
+        languages: languageFilter,
+      }),
+    [graph, searchQuery, clusterFilter, languageFilter]
+  );
+
+  React.useEffect(() => {
+    setMatchingNodeIds(matchingNodeIds);
+  }, [matchingNodeIds, setMatchingNodeIds]);
 
   // Find currently selected node metadata
   const selectedNode: GraphNode | undefined = React.useMemo(() => {
@@ -114,50 +138,24 @@ function ExploreContent() {
         </div>
       }
       sidebar={
-        selectedNode && graph ? (
-          <DetailsPanel
-            key={selectedNode.id}
-            node={selectedNode}
-            graph={graph}
-            onClose={clearSelection}
-            onSelectNode={handleSelectNode}
-          />
-        ) : (
-          <Panel className="h-full rounded-none border-none">
-            <PanelHeader
-              title="Repository Clusters"
-              subtitle={
-                graph
-                  ? `${graph.clusters.length} architectural clusters`
-                  : "Loading..."
-              }
-            />
-            <PanelContent className="space-y-3">
-              {graph?.clusters.map((cluster) => (
-                <div
-                  key={cluster.id}
-                  className="flex items-center justify-between p-2.5 rounded-md border border-border-subtle bg-surface-elevated text-xs transition-colors hover:border-border-focus"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className="w-3 h-3 rounded-full shrink-0 shadow-sm"
-                      style={{ backgroundColor: cluster.color }}
-                    />
-                    <span className="font-medium text-text-primary">
-                      {cluster.name}
-                    </span>
-                  </div>
-                  <span className="font-mono text-text-muted">
-                    {cluster.nodeCount} files
-                  </span>
-                </div>
-              ))}
-
-              {graph ? (
-                <div className="mt-6 pt-4 border-t border-border-subtle/80 space-y-2">
-                  <p className="text-[11px] font-mono font-medium text-text-muted uppercase tracking-wider">
-                    Graph Topology
-                  </p>
+        graph ? (
+          <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
+            <SearchFilterBar graph={graph} />
+            {selectedNode ? (
+              <DetailsPanel
+                key={selectedNode.id}
+                node={selectedNode}
+                graph={graph}
+                onClose={clearSelection}
+                onSelectNode={handleSelectNode}
+              />
+            ) : (
+              <Panel className="min-h-0 flex-1 rounded-none border-none">
+                <PanelHeader
+                  title="Graph Topology"
+                  subtitle={`${graph.repo.owner}/${graph.repo.name} @ ${graph.repo.commitSha.slice(0, 7)}`}
+                />
+                <PanelContent className="space-y-2">
                   <div className="flex justify-between text-xs text-text-secondary">
                     <span>Total Files</span>
                     <span className="font-mono text-text-primary">
@@ -177,16 +175,22 @@ function ExploreContent() {
                     </span>
                   </div>
                   <div className="flex justify-between text-xs text-text-secondary">
+                    <span>Symbols</span>
+                    <span className="font-mono text-text-primary">
+                      {graph.stats.totalSymbols}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs text-text-secondary">
                     <span>Physics Engine</span>
                     <span className="font-mono text-accent text-[11px]">
                       ForceAtlas2 (Worker)
                     </span>
                   </div>
-                </div>
-              ) : null}
-            </PanelContent>
-          </Panel>
-        )
+                </PanelContent>
+              </Panel>
+            )}
+          </div>
+        ) : null
       }
     >
       <div className="relative h-full w-full overflow-hidden bg-surface-base">

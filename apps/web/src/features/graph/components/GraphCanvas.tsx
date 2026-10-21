@@ -19,6 +19,7 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
   const [isLayoutRunning, setIsLayoutRunning] = React.useState(true);
 
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId);
+  const matchingNodeIds = useGraphStore((s) => s.matchingNodeIds);
 
   React.useEffect(() => {
     if (!containerRef.current || !data) return;
@@ -43,9 +44,22 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
 
     sigmaRef.current = renderer;
 
-    // 3. Register Sigma visual reducers for hover and selection highlighting
+    // 3. Register Sigma visual reducers for filter, hover and selection highlighting
     renderer.setSetting("nodeReducer", (node, nodeData) => {
       const state = useGraphStore.getState();
+
+      // Filter layer: a node that fails the active filter is dimmed and loses
+      // its label, even if it is hovered or selected. matchingNodeIds === null
+      // means "no filter active", so the check is skipped entirely.
+      if (state.matchingNodeIds !== null && !state.matchingNodeIds.has(node)) {
+        return {
+          ...nodeData,
+          color: "#18191e",
+          label: "",
+          zIndex: 0,
+        };
+      }
+
       const activeNode = state.hoveredNodeId || state.selectedNodeId;
       const activeNeighbors = state.hoveredNodeId
         ? state.hoveredNeighbors
@@ -81,13 +95,22 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
 
     renderer.setSetting("edgeReducer", (edge, edgeData) => {
       const state = useGraphStore.getState();
+      const [source, target] = graph.extremities(edge);
+
+      // Filter layer: an edge survives only when both of its endpoints survive.
+      if (
+        state.matchingNodeIds !== null &&
+        (!state.matchingNodeIds.has(source) ||
+          !state.matchingNodeIds.has(target))
+      ) {
+        return { ...edgeData, hidden: true };
+      }
+
       const activeNode = state.hoveredNodeId || state.selectedNodeId;
 
       if (!activeNode) return edgeData;
 
-      const extremes = graph.extremities(edge);
-      const isConnected =
-        extremes[0] === activeNode || extremes[1] === activeNode;
+      const isConnected = source === activeNode || target === activeNode;
 
       if (isConnected) {
         return {
@@ -184,6 +207,13 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
     }
     renderer.refresh();
   }, [selectedNodeId]);
+
+  // Reducer settings only take effect on a refresh. Hover and click handlers
+  // call refresh() themselves, but filter changes arrive from React UI,
+  // so this effect repaints the canvas whenever the match set changes.
+  React.useEffect(() => {
+    sigmaRef.current?.refresh();
+  }, [matchingNodeIds]);
 
   function handleZoomIn() {
     sigmaRef.current?.getCamera().animatedZoom({ duration: 250 });
