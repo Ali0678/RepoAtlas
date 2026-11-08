@@ -9,6 +9,7 @@ export interface DetailsPanelProps {
   graph: RepoGraph;
   onClose: () => void;
   onSelectNode: (nodeId: string) => void;
+  onAnalyzeImpact?: (nodeId: string) => void;
   className?: string;
 }
 
@@ -76,6 +77,7 @@ export function DetailsPanel({
   graph,
   onClose,
   onSelectNode,
+  onAnalyzeImpact,
   className,
 }: DetailsPanelProps) {
   const [copied, setCopied] = React.useState(false);
@@ -192,6 +194,21 @@ export function DetailsPanel({
           </div>
 
           <div className="flex items-center gap-1">
+            {/* Impact Analysis Button */}
+            {onAnalyzeImpact ? (
+              <button
+                type="button"
+                onClick={() => onAnalyzeImpact(node.id)}
+                title="Analyze blast radius / dependents"
+                className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-rose-500/10 text-rose-400 border border-rose-500/25 hover:bg-rose-500/20 hover:border-rose-500/40 transition-colors cursor-pointer"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <span>Impact</span>
+              </button>
+            ) : null}
+
             {/* Copy Path Button */}
             <button
               type="button"
@@ -301,7 +318,18 @@ export function DetailsPanel({
               <span className="text-lg font-bold font-mono text-text-primary">
                 {importedByNodes.length}
               </span>
-              <span className="text-[10px] font-mono text-text-muted">in-degree</span>
+              {onAnalyzeImpact && importedByNodes.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => onAnalyzeImpact(node.id)}
+                  className="text-[10px] font-mono text-rose-400 hover:text-rose-300 hover:underline cursor-pointer transition-colors"
+                  title="Analyze recursive blast radius"
+                >
+                  blast radius →
+                </button>
+              ) : (
+                <span className="text-[10px] font-mono text-text-muted">in-degree</span>
+              )}
             </div>
           </div>
 

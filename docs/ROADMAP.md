@@ -53,7 +53,7 @@ Teach in this phase: React fundamentals as needed, hooks, TypeScript types, comp
 - [x] **P1-S09 Chat panel UI**
   Chat panel with a mocked streaming response, citation chips that highlight nodes.
   DoD: typing a question streams mock tokens, clicking a chip focuses the node.
-- [ ] **P1-S10 Impact mode UI**
+- [x] **P1-S10 Impact mode UI**
   Select a node, choose depth, highlight dependents by depth with a ripple effect (mock computation on the client).
   DoD: depth slider updates highlights, legend explains depth colors.
 - [ ] **P1-S11 Color modes**

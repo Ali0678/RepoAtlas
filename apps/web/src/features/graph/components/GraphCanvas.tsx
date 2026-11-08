@@ -10,8 +10,10 @@ import {
   phaseOffsetFor,
   pulseIntensity,
 } from "../lib/visualPolish";
+import { DEPTH_COLORS } from "@/features/impact/lib/impactAnalysis";
+import { resolveNodeColor } from "../lib/colorModes";
 import { useGraphStore } from "@/store/useGraphStore";
-import type { RepoGraph } from "@/types/graph";
+import type { RepoGraph, GraphNode } from "@/types/graph";
 
 export interface GraphCanvasProps {
   data: RepoGraph;
@@ -38,6 +40,14 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId);
   const hoveredNodeId = useGraphStore((s) => s.hoveredNodeId);
   const matchingNodeIds = useGraphStore((s) => s.matchingNodeIds);
+  const impactTargetId = useGraphStore((s) => s.impactTargetId);
+  const impactedNodes = useGraphStore((s) => s.impactedNodes);
+  const colorMode = useGraphStore((s) => s.colorMode);
+
+  const clusterColorMap = React.useMemo(
+    () => new Map(data.clusters.map((c) => [c.id, c.color])),
+    [data.clusters]
+  );
 
   React.useEffect(() => {
     if (!containerRef.current || !data) return;
@@ -83,12 +93,60 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
         };
       }
 
+      // --- Impact Mode Layer ---
+      if (state.impactTargetId) {
+        if (node === state.impactTargetId) {
+          const glow = pulseIntensity(flowPhaseRef.current);
+          return {
+            ...nodeData,
+            highlighted: true,
+            zIndex: 20,
+            size: nodeData.size * (1.4 + 0.3 * glow),
+            color: DEPTH_COLORS[0],
+            forceLabel: true,
+          };
+        }
+
+        const depth = state.impactedNodes.get(node);
+        if (depth !== undefined && depth > 0) {
+          const depthColor =
+            DEPTH_COLORS[depth as keyof typeof DEPTH_COLORS] ?? "#eab308";
+          return {
+            ...nodeData,
+            highlighted: false,
+            zIndex: 15 - depth,
+            size: nodeData.size * Math.max(1.0, 1.3 - depth * 0.1),
+            color: depthColor,
+            forceLabel: true,
+          };
+        }
+
+        // Unaffected node in impact mode: dim out
+        return {
+          ...nodeData,
+          color: "#18191e",
+          label: "",
+          zIndex: 0,
+        };
+      }
+
+      // --- Resolve Base Color by Active Color Mode ---
+      const rawNode = (nodeData as unknown as { raw?: GraphNode }).raw;
+      const baseColor = rawNode
+        ? resolveNodeColor(rawNode, state.colorMode, clusterColorMap)
+        : nodeData.color;
+
       const activeNode = state.hoveredNodeId || state.selectedNodeId;
       const activeNeighbors = state.hoveredNodeId
         ? state.hoveredNeighbors
         : state.selectedNeighbors;
 
-      if (!activeNode) return nodeData;
+      if (!activeNode) {
+        return {
+          ...nodeData,
+          color: baseColor,
+        };
+      }
 
       // Hover pulses at half strength so selection reads as stronger.
       const amplitude = state.hoveredNodeId ? 0.5 : 1;
@@ -100,7 +158,7 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
           highlighted: true,
           zIndex: 10,
           size: nodeData.size * (1.3 + 0.3 * glow),
-          color: interpolateColor(nodeData.color, NODE_GLOW_TARGET, 0.4 * glow),
+          color: interpolateColor(baseColor, NODE_GLOW_TARGET, 0.4 * glow),
           forceLabel: true,
         };
       }
@@ -108,6 +166,7 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
       if (activeNeighbors.has(node)) {
         return {
           ...nodeData,
+          color: baseColor,
           highlighted: false,
           zIndex: 5,
           forceLabel: true,
@@ -133,6 +192,31 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
         (!state.matchingNodeIds.has(source) ||
           !state.matchingNodeIds.has(target))
       ) {
+        return { ...edgeData, hidden: true };
+      }
+
+      // --- Impact Mode Layer ---
+      if (state.impactTargetId) {
+        const targetDepth =
+          target === state.impactTargetId ? 0 : state.impactedNodes.get(target);
+        const sourceDepth =
+          source === state.impactTargetId ? 0 : state.impactedNodes.get(source);
+
+        const isImpactEdge =
+          targetDepth !== undefined &&
+          sourceDepth !== undefined &&
+          sourceDepth === targetDepth + 1;
+
+        if (isImpactEdge) {
+          const flow = pulseIntensity(flowPhaseRef.current, phaseOffsetFor(edge));
+          return {
+            ...edgeData,
+            color: interpolateColor("#ea580c", "#fed7aa", flow),
+            size: Math.max(2, edgeData.size * 1.8 + 1.5 * flow),
+            zIndex: 10,
+          };
+        }
+
         return { ...edgeData, hidden: true };
       }
 
@@ -243,15 +327,30 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
     renderer.refresh();
   }, [selectedNodeId]);
 
+  // Sync camera when impactTargetId changes
+  React.useEffect(() => {
+    const renderer = sigmaRef.current;
+    if (!renderer || !impactTargetId) return;
+
+    const nodePosition = renderer.getNodeDisplayData(impactTargetId);
+    if (nodePosition) {
+      renderer.getCamera().animate(
+        { x: nodePosition.x, y: nodePosition.y, ratio: 0.22 },
+        { duration: 450 }
+      );
+    }
+    renderer.refresh();
+  }, [impactTargetId]);
+
   // Reducer settings only take effect on a refresh. Hover and click handlers
-  // call refresh() themselves, but filter changes arrive from React UI,
-  // so this effect repaints the canvas whenever the match set changes.
+  // call refresh() themselves, but filter, impact, and color mode changes arrive from React UI,
+  // so this effect repaints the canvas whenever filters, impact, or color mode state change.
   React.useEffect(() => {
     sigmaRef.current?.refresh();
-  }, [matchingNodeIds]);
+  }, [matchingNodeIds, impactTargetId, impactedNodes, colorMode]);
 
-  // Edge flow animation loop. Runs only while something is hovered or
-  // selected: each frame advances the shared clock by the real elapsed time
+  // Edge flow animation loop. Runs while something is hovered, selected, or in impact mode:
+  // each frame advances the shared clock by the real elapsed time
   // (frame-rate independent) and refreshes so the reducers re-evaluate with
   // the new phase. Cleanup cancels the loop on unmount or state change, and
   // one final refresh when the loop stops repaints the static end state.
@@ -259,7 +358,7 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
     const renderer = sigmaRef.current;
     if (!renderer) return;
 
-    if (!hoveredNodeId && !selectedNodeId) {
+    if (!hoveredNodeId && !selectedNodeId && !impactTargetId) {
       renderer.refresh();
       return;
     }
@@ -276,7 +375,7 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
 
     frameId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameId);
-  }, [hoveredNodeId, selectedNodeId]);
+  }, [hoveredNodeId, selectedNodeId, impactTargetId]);
 
   // Dev-only FPS meter: sigma emits beforeRender on every render pass.
   React.useEffect(() => {

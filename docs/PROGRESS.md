@@ -5,8 +5,8 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 ## Current status
 
 - Phase: 1 (Frontend with mock data)
-- Current step: P1-S10 (not started)
-- Last completed step: P1-S09
+- Current step: P1-S11 (not started)
+- Last completed step: P1-S10
 - Last updated: 2026-11-08
 
 ## Environment facts
@@ -43,6 +43,7 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 | P1-S07 | 2026-10-21 | Search by path/symbol, cluster and language filter toggles, reducer dimming, match counter | 6810e2c |
 | P1-S08 | 2026-10-21 | Pulsing edge flow, active node glow, zoom-based label rules, dev FPS meter | 903b864 |
 | P1-S09 | 2026-11-08 | Collapsible chat panel, token streaming simulation, interactive citation chips | pending |
+| P1-S10 | 2026-11-08 | Blast radius impact analysis: reverse BFS, depth slider, depth gradient palette, metrics | pending |
 
 ## Decisions made since the last update
 

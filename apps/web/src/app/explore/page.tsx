@@ -11,6 +11,8 @@ import { GraphCanvas } from "@/features/graph/components/GraphCanvas";
 import { DetailsPanel } from "@/features/graph/components/DetailsPanel";
 import { SearchFilterBar } from "@/features/graph/components/SearchFilterBar";
 import { ChatPanel } from "@/features/chat/components/ChatPanel";
+import { ImpactPanel } from "@/features/impact/components/ImpactPanel";
+import { ColorModeSelector } from "@/features/graph/components/ColorModeSelector";
 import { computeMatchingNodeIds } from "@/features/graph/lib/graphFilters";
 import { useGraphStore } from "@/store/useGraphStore";
 import { getGraph } from "@/lib/api";
@@ -35,6 +37,10 @@ function ExploreContent() {
   const languageFilter = useGraphStore((s) => s.languageFilter);
   const setMatchingNodeIds = useGraphStore((s) => s.setMatchingNodeIds);
 
+  const impactTargetId = useGraphStore((s) => s.impactTargetId);
+  const setImpactTarget = useGraphStore((s) => s.setImpactTarget);
+  const clearImpactMode = useGraphStore((s) => s.clearImpactMode);
+
   React.useEffect(() => {
     let isMounted = true;
 
@@ -57,11 +63,13 @@ function ExploreContent() {
     };
   }, [repoParam]);
 
-  // Press Escape to deselect or close chat
+  // Press Escape to exit impact mode, deselect, or close chat
   React.useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        if (selectedNodeId) {
+        if (impactTargetId) {
+          clearImpactMode();
+        } else if (selectedNodeId) {
           clearSelection();
         } else if (isChatOpen) {
           setIsChatOpen(false);
@@ -70,7 +78,7 @@ function ExploreContent() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedNodeId, isChatOpen, clearSelection]);
+  }, [selectedNodeId, isChatOpen, impactTargetId, clearSelection, clearImpactMode]);
 
   // Derived state: the match set is a pure function of nodes + filters.
   const matchingNodeIds = React.useMemo(
@@ -93,7 +101,7 @@ function ExploreContent() {
     return graph.nodes.find((n) => n.id === selectedNodeId);
   }, [graph, selectedNodeId]);
 
-  // Handler for selecting a node (from DetailsPanel, CitationChip, etc.)
+  // Handler for selecting a node (from DetailsPanel, CitationChip, ImpactPanel, etc.)
   const handleSelectNode = React.useCallback(
     (nodeId: string) => {
       if (!graph) return;
@@ -161,13 +169,22 @@ function ExploreContent() {
         graph ? (
           <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
             <SearchFilterBar graph={graph} />
-            {selectedNode ? (
+            {impactTargetId ? (
+              <ImpactPanel
+                key={impactTargetId}
+                graph={graph}
+                targetNodeId={impactTargetId}
+                onSelectNode={handleSelectNode}
+                onClose={clearImpactMode}
+              />
+            ) : selectedNode ? (
               <DetailsPanel
                 key={selectedNode.id}
                 node={selectedNode}
                 graph={graph}
                 onClose={clearSelection}
                 onSelectNode={handleSelectNode}
+                onAnalyzeImpact={(nodeId) => setImpactTarget(nodeId)}
               />
             ) : (
               <Panel className="min-h-0 flex-1 rounded-none border-none">
@@ -226,6 +243,11 @@ function ExploreContent() {
         ) : graph ? (
           <>
             <GraphCanvas data={graph} />
+
+            {/* Floating Color Mode Selector & Adaptive Legend */}
+            <div className="absolute top-4 right-4 z-20">
+              <ColorModeSelector graph={graph} />
+            </div>
 
             {/* Floating Chat Panel & Toggle Button */}
             <div className="absolute bottom-5 left-5 z-30">
