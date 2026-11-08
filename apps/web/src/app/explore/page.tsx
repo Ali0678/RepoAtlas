@@ -10,6 +10,7 @@ import { Panel, PanelHeader, PanelContent } from "@/components/Panel";
 import { GraphCanvas } from "@/features/graph/components/GraphCanvas";
 import { DetailsPanel } from "@/features/graph/components/DetailsPanel";
 import { SearchFilterBar } from "@/features/graph/components/SearchFilterBar";
+import { ChatPanel } from "@/features/chat/components/ChatPanel";
 import { computeMatchingNodeIds } from "@/features/graph/lib/graphFilters";
 import { useGraphStore } from "@/store/useGraphStore";
 import { getGraph } from "@/lib/api";
@@ -23,6 +24,7 @@ function ExploreContent() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [inputUrl, setInputUrl] = React.useState(repoParam);
+  const [isChatOpen, setIsChatOpen] = React.useState(false);
 
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId);
   const clearSelection = useGraphStore((s) => s.clearSelection);
@@ -55,20 +57,22 @@ function ExploreContent() {
     };
   }, [repoParam]);
 
-  // Press Escape to deselect
+  // Press Escape to deselect or close chat
   React.useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape" && selectedNodeId) {
-        clearSelection();
+      if (e.key === "Escape") {
+        if (selectedNodeId) {
+          clearSelection();
+        } else if (isChatOpen) {
+          setIsChatOpen(false);
+        }
       }
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedNodeId, clearSelection]);
+  }, [selectedNodeId, isChatOpen, clearSelection]);
 
   // Derived state: the match set is a pure function of nodes + filters.
-  // Computed here with useMemo, then synced into the store once, because
-  // the sigma reducers inside GraphCanvas read it via getState().
   const matchingNodeIds = React.useMemo(
     () =>
       computeMatchingNodeIds(graph?.nodes ?? [], {
@@ -89,7 +93,7 @@ function ExploreContent() {
     return graph.nodes.find((n) => n.id === selectedNodeId);
   }, [graph, selectedNodeId]);
 
-  // Handler for clicking a neighbor inside DetailsPanel
+  // Handler for selecting a node (from DetailsPanel, CitationChip, etc.)
   const handleSelectNode = React.useCallback(
     (nodeId: string) => {
       if (!graph) return;
@@ -126,6 +130,22 @@ function ExploreContent() {
           </div>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant={isChatOpen ? "primary" : "ghost"}
+              size="sm"
+              onClick={() => setIsChatOpen((prev) => !prev)}
+              className="flex items-center gap-1.5"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                />
+              </svg>
+              <span>Ask AI</span>
+            </Button>
             <Link href="/">
               <Button variant="ghost" size="sm">
                 Gallery
@@ -204,7 +224,41 @@ function ExploreContent() {
             <p className="text-sm text-danger">{error}</p>
           </div>
         ) : graph ? (
-          <GraphCanvas data={graph} />
+          <>
+            <GraphCanvas data={graph} />
+
+            {/* Floating Chat Panel & Toggle Button */}
+            <div className="absolute bottom-5 left-5 z-30">
+              {isChatOpen ? (
+                <ChatPanel
+                  graph={graph}
+                  onSelectNode={handleSelectNode}
+                  onClose={() => setIsChatOpen(false)}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsChatOpen(true)}
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-panel/95 hover:bg-surface-elevated border border-border-subtle hover:border-accent text-xs font-medium text-text-primary shadow-xl backdrop-blur transition-all cursor-pointer group"
+                >
+                  <span className="flex h-5 w-5 items-center justify-center rounded bg-accent/15 text-accent group-hover:scale-110 transition-transform">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                      />
+                    </svg>
+                  </span>
+                  <span>Ask RepoAtlas AI</span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-surface-elevated border border-border-subtle text-accent">
+                    mock
+                  </span>
+                </button>
+              )}
+            </div>
+          </>
         ) : null}
       </div>
     </AppShell>

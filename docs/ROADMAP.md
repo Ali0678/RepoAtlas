@@ -50,7 +50,7 @@ Teach in this phase: React fundamentals as needed, hooks, TypeScript types, comp
 - [x] **P1-S08 Edge flow and visual polish**
   Animated edge emphasis on selection, glow, label rules (labels appear by zoom level).
   DoD: 60 fps on the mock graph on a normal laptop, no label clutter.
-- [ ] **P1-S09 Chat panel UI**
+- [x] **P1-S09 Chat panel UI**
   Chat panel with a mocked streaming response, citation chips that highlight nodes.
   DoD: typing a question streams mock tokens, clicking a chip focuses the node.
 - [ ] **P1-S10 Impact mode UI**
