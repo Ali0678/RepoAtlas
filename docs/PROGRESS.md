@@ -5,8 +5,8 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 ## Current status
 
 - Phase: 1 (Frontend with mock data)
-- Current step: P1-S08 (not started)
-- Last completed step: P1-S07
+- Current step: P1-S09 (not started)
+- Last completed step: P1-S08
 - Last updated: 2026-10-21
 
 ## Environment facts
@@ -41,6 +41,7 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 | P1-S05 | 2026-10-19 | Hover/selection reducers, 1-hop neighbor highlighting, camera gliding, Zustand store | 717e5b6 |
 | P1-S06 | 2026-10-20 | Details panel: metric tiles, imports/imported-by tabs, symbol list, neighbor navigation | 41a6925 |
 | P1-S07 | 2026-10-21 | Search by path/symbol, cluster and language filter toggles, reducer dimming, match counter | 6810e2c |
+| P1-S08 | 2026-10-21 | Pulsing edge flow, active node glow, zoom-based label rules, dev FPS meter | 903b864 |
 
 ## Decisions made since the last update
 

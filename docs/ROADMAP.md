@@ -47,7 +47,7 @@ Teach in this phase: React fundamentals as needed, hooks, TypeScript types, comp
 - [x] **P1-S07 Search and filters**
   Search by path or symbol, filter by cluster and language, dim non-matching nodes.
   DoD: filters combine correctly, clearing restores the full graph.
-- [ ] **P1-S08 Edge flow and visual polish**
+- [x] **P1-S08 Edge flow and visual polish**
   Animated edge emphasis on selection, glow, label rules (labels appear by zoom level).
   DoD: 60 fps on the mock graph on a normal laptop, no label clutter.
 - [ ] **P1-S09 Chat panel UI**
