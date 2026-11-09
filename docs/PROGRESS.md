@@ -5,8 +5,8 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 ## Current status
 
 - Phase: 2 (Backend and ingestion); Phase 1 complete, confirmed by Ali
-- Current step: P2-S02, Stage A (brief); implementation not started
-- Last completed step: P2-S01
+- Current step: P2-S03 (not started)
+- Last completed step: P2-S02
 - Last updated: 2026-11-09
 
 ## Environment facts
@@ -47,22 +47,29 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 | P1-S11 | 2026-11-08 | Color modes (cluster, complexity, churn), dynamic nodeReducer recoloring, adaptive legend | pending |
 | P1-S12 | 2026-11-09 | Async states, WebGL recovery, keyboard accessibility, and responsiveness; verification confirmed by Ali | pending |
 | P1-S13 | 2026-11-09 | Frontend tests and demo tooling; S13 verification confirmed by Ali | pending |
-
 | P2-S01 | 2026-11-09 | FastAPI factory, validated settings, /health confirmed by Ali; lint, formatting, mypy and 5 tests passed; ADR-016 | pending |
+| P2-S02 | 2026-11-09 | Compose services, connection lifecycle, worker placeholder; 18 tests and quality checks pass; live health/shutdown confirmed by Ali | pending |
 
 ## Visual redesign (2026-11-09)
 
 - Ali authorized a cartographic redesign outside the current roadmap step. Rebuilt landing page and shared typography/palette; themed workspace and graph, with matching generator colors. ADR-015 records the design.
 - Lint, full TypeScript, and 56 unit tests pass after redesign. Ali subsequently confirmed S12/S13 verification.
 
+## P2-S02 verification (2026-11-09)
+
+- Ali implemented the Docker image, connection manager, FastAPI lifespan, worker placeholder, and Compose services.
+- At Ali's request, the AI added connection/lifecycle tests and isolated database/Redis environment variables in fixtures. Runtime application code was unchanged.
+- Ruff lint, formatting, strict mypy (17 files), and all 18 tests passed. New tests use simulated clients to cover startup errors, normal shutdown, cleanup failures, cancellation, and worker signal handling.
+- Compose configuration validates. Ali confirmed all four services run, /health returns 200, and the worker stops cleanly. Understanding check completed: service-name addressing and health-gated startup.
+
 ## Decisions made since the last update
 
-- ADR-016: strict mypy with the Pydantic plugin for backend type checking.
+- ADR-017: container networking, health-gated startup, and shared API/worker image.
 - P2-S01 checks executed successfully on 2026-11-09. Pydantic plugin and explicit pytest-asyncio fixture loop scope fixed the reported tooling issues. Ali requested proceeding directly to the next step.
 
 ## Open questions
 
-- None blocking P2-S01. Ali confirmed S12/S13 verification; exact Lighthouse scores and demo evidence were not supplied in chat and are not invented here.
+- None blocking P2-S03. Ali confirmed S12/S13 verification; exact Lighthouse scores and demo evidence were not supplied in chat and are not invented here.
 
 ## Known issues and tech debt
 

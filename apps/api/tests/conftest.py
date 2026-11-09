@@ -10,7 +10,7 @@ from app.main import create_app
 @pytest.fixture(autouse=True)
 def isolate_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     for name in list(os.environ):
-        if name.upper() in {"WEB_ORIGIN", "API_ORIGIN"}:
+        if name.upper() in {"WEB_ORIGIN", "API_ORIGIN", "DATABASE_URL", "REDIS_URL"}:
             monkeypatch.delenv(name)
 
 

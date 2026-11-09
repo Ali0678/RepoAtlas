@@ -125,3 +125,10 @@ Context: The backend requires static type checking, including Pydantic Settings 
 Decision: Use mypy in strict mode with the pydantic.mypy plugin. Run checks over app and tests. Set pytest-asyncio's default fixture loop scope explicitly to function.
 Alternatives: Pyright is capable but would add a different tooling ecosystem. Suppressing call-arg errors would hide useful errors rather than model the library correctly.
 Consequences: Backend models and tests remain type-checked. Confirm plugin compatibility during dependency upgrades. P2-S01 passed lint, formatting, mypy, and all five tests after configuration changes.
+
+## ADR-017: Local Compose service boundaries
+Status: Accepted
+Context: API and worker need reproducible local PostgreSQL and Redis connections and reliable startup/shutdown.
+Decision: Use one backend image with separate API and worker commands. Address dependencies by Compose service names, gate startup on their health checks, and publish only API port 8000 on host loopback. Use named volumes for PostgreSQL and Redis, PostgreSQL 18 with pgvector available, and Redis append-only persistence. Verify connections during process startup and close them with bounded shutdown waits.
+Alternatives: Host-installed services (less reproducible); startup order without health checks (can race service initialization); separate worker image (duplicates the current runtime).
+Consequences: The worker remains a placeholder until the queue implementation. Host-run API requires reachable service addresses; default Compose does not publish database/Redis ports. SQLAlchemy resource management will replace direct database pool management in P2-S03. Live Compose operation was confirmed by Ali; connection and lifecycle failure paths are covered by automated tests.

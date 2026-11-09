@@ -73,7 +73,7 @@ Teach in this phase: async Python, FastAPI dependency injection, SQLAlchemy 2 as
 - [x] **P2-S01 API scaffold**
   `apps/api` with uv, FastAPI app factory, settings, `/health`, ruff, type checker, pytest.
   DoD: `/health` returns 200, tests and linters pass. Type checker choice recorded in an ADR.
-- [ ] **P2-S02 Docker Compose**
+- [x] **P2-S02 Docker Compose**
   Postgres (pgvector image), Redis, api, worker placeholder. `.env.example`.
   DoD: `docker compose up` brings up all services, api connects to both.
 - [ ] **P2-S03 Database models and migrations**
