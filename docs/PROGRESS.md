@@ -4,9 +4,9 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 
 ## Current status
 
-- Phase: 1 (Frontend with mock data) — S12/S13 implementation finished, verification pending
-- Current step: P1-S12 (verification); P1-S13 implementation prepared at Ali’s request
-- Last completed step: P1-S11
+- Phase: 2 (Backend and ingestion); Phase 1 complete, confirmed by Ali
+- Current step: P2-S02, Stage A (brief); implementation not started
+- Last completed step: P2-S01
 - Last updated: 2026-11-09
 
 ## Environment facts
@@ -23,8 +23,8 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 
 ## Working preferences
 
-- The AI writes and edits files in the repo directly and displays every code block it writes in the chat. Ali reviews the changes before committing.
-- Ali runs the app, all verification commands and all git commands himself and reports the results. The AI never claims something works before Ali has confirmed it.
+- The AI supplies implementation code in chat, one explained chunk at a time. Ali writes and edits the codebase himself. Documentation edits require explicit authorization; Ali authorized this ROADMAP.md and PROGRESS.md update.
+- Ali normally runs the app and verification commands; the AI may run checks when explicitly requested. Ali runs all git commands. Claims of passing checks require executed results or Ali’s confirmation.
 - Each step ends with a "Version control" block listing the exact git commands to commit and push. Ali runs them.
 
 ## Completed steps
@@ -45,28 +45,29 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 | P1-S09 | 2026-11-08 | Collapsible chat panel, token streaming simulation, interactive citation chips | pending |
 | P1-S10 | 2026-11-08 | Blast radius impact analysis: reverse BFS, depth slider, depth gradient palette, metrics | pending |
 | P1-S11 | 2026-11-08 | Color modes (cluster, complexity, churn), dynamic nodeReducer recoloring, adaptive legend | pending |
-| P1-S12 | 2026-11-09 | Implementation ready: async states, WebGL error boundary, focus management, responsive sidebar/chat, keyboard fixes; browser/a11y verification pending | pending |
-| P1-S13 | 2026-11-09 | Implementation ready: six Vitest suites, Chromium desktop/mobile smoke tests, demo recording script; full execution pending | pending |
+| P1-S12 | 2026-11-09 | Async states, WebGL recovery, keyboard accessibility, and responsiveness; verification confirmed by Ali | pending |
+| P1-S13 | 2026-11-09 | Frontend tests and demo tooling; S13 verification confirmed by Ali | pending |
+
+| P2-S01 | 2026-11-09 | FastAPI factory, validated settings, /health confirmed by Ali; lint, formatting, mypy and 5 tests passed; ADR-016 | pending |
 
 ## Visual redesign (2026-11-09)
 
 - Ali authorized a cartographic redesign outside the current roadmap step. Rebuilt landing page and shared typography/palette; themed workspace and graph, with matching generator colors. ADR-015 records the design.
-- Lint, full TypeScript, and 56 unit tests pass after redesign. Browser preview was unavailable; visual and responsive review remain pending.
+- Lint, full TypeScript, and 56 unit tests pass after redesign. Ali subsequently confirmed S12/S13 verification.
 
 ## Decisions made since the last update
 
-- ADR-014: browser smoke tests exercise real sigma/WebGL; component tests isolate async states and focus behavior.
+- ADR-016: strict mypy with the Pydantic plugin for backend type checking.
+- P2-S01 checks executed successfully on 2026-11-09. Pydantic plugin and explicit pytest-asyncio fixture loop scope fixed the reported tooling issues. Ali requested proceeding directly to the next step.
 
 ## Open questions
 
-- Ali must confirm verification results before S12/S13 close and P2-S01 starts.
+- None blocking P2-S01. Ali confirmed S12/S13 verification; exact Lighthouse scores and demo evidence were not supplied in chat and are not invented here.
 
 ## Known issues and tech debt
 
-- Ali installed test dependencies and Chromium. Lint, full type checking, and all 56 unit tests pass (also rerun by the AI after the fix).
-- Production prerendering exposed sigma importing WebGL globals on the server. Fixed with a browser-only dynamic GraphCanvas import; local build rerun pending. The assistant's Turbopack build attempt is blocked by sandbox port-binding permissions.
-- esbuild's interrupted build permission placeholder was changed to true; run `pnpm rebuild esbuild` locally.
-- Browser smoke, Lighthouse, and demo remain pending. See `docs/FRONTEND_VERIFICATION.md`.
+- Ali confirmed frontend verification and authorized closing S12/S13. Earlier build and installation blockers are historical; the WebGL import and esbuild permission fixes are implemented.
+- Exact accessibility scores and demo artifact location have not been supplied in chat. The earlier verification guide contains historical pending notes; reconcile it with the actual reports when recording detailed evidence.
 - Existing architecture gaps outside S12/S13 remain: component-effect graph fetching (TanStack Query planned in P2-S11), timed layout stop without position caching, mock node citations must become validated chunk citations in P3.
 
 

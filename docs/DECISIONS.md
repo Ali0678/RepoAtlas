@@ -118,3 +118,10 @@ Context: The frontend lacked a distinctive identity connected to repository expl
 Decision: Treat RepoAtlas as a survey atlas: deep green surfaces, warm paper text, vermilion actions, mineral cluster colors, Fraunces display typography, Manrope UI typography, and IBM Plex Mono annotations. The landing illustration uses the mock graph itself. Keep complexity/churn risk colors semantically distinct. Label mock functionality explicitly.
 Alternatives: Generic dashboard cards (weak connection to the product); ornamental 3D backgrounds (rendering cost without helping navigation).
 Consequences: Shared tokens theme existing panels. Generator and mock graph palettes stay synchronized. Fonts remain served through next/font/google and need network access at build time. Visual browser and mobile review remain pending; lint, full TypeScript, and all 56 unit tests pass.
+
+## ADR-016: Strict mypy with Pydantic integration
+Status: Accepted
+Context: The backend requires static type checking, including Pydantic Settings constructor arguments such as _env_file.
+Decision: Use mypy in strict mode with the pydantic.mypy plugin. Run checks over app and tests. Set pytest-asyncio's default fixture loop scope explicitly to function.
+Alternatives: Pyright is capable but would add a different tooling ecosystem. Suppressing call-arg errors would hide useful errors rather than model the library correctly.
+Consequences: Backend models and tests remain type-checked. Confirm plugin compatibility during dependency upgrades. P2-S01 passed lint, formatting, mypy, and all five tests after configuration changes.

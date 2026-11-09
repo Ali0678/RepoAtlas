@@ -176,8 +176,8 @@ API_ORIGIN=http://localhost:8000
 | zustand | 5.0.15 (lockfile) | checked 2026-11-09 |
 | Python | 3.14.7 | P0-S01 |
 | uv | 0.13.0 | P0-S01 |
-| FastAPI | | |
-| Pydantic | | |
+| FastAPI | 0.162.2 | P2-S01 |
+| Pydantic | 2.14.3 | P2-S01 |
 | SQLAlchemy | | |
 | Alembic | | |
 | ARQ | | |
@@ -189,3 +189,5 @@ API_ORIGIN=http://localhost:8000
 Frontend test tooling update (2026-11-09): `playwright` is declared at ^1.62.1 and imports its bundled runner from `playwright/test`. Version 1.62.1 and runner APIs were checked against the available runtime source; project dependency installation and lockfile resolution remain pending. Vitest, jsdom, and Testing Library retain the declarations from the interrupted S13 work; their resolved versions must be recorded after installation. Lighthouse is invoked with `pnpm dlx lighthouse` for a local audit, not shipped in the app.
 
 Installed test versions reported by Ali on 2026-11-09: Playwright 1.65.0, Vitest 2.1.9, jsdom 25.0.1, Testing Library React 16.3.3. `allowBuilds.esbuild: true` permits esbuild's platform binary setup. GraphCanvas uses a browser-only Next dynamic import because sigma accesses WebGL globals at module initialization.
+
+P2-S01 resolved tools (2026-11-09): Python 3.14.8, pydantic-settings 2.16.2, Uvicorn 0.54.0, Ruff 0.17.4, mypy 2.4.1, pytest 9.2.0, pytest-asyncio 1.4.1.post1, httpx 0.28.1. Backend typing uses strict mypy with pydantic.mypy (ADR-016).

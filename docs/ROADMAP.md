@@ -59,10 +59,10 @@ Teach in this phase: React fundamentals as needed, hooks, TypeScript types, comp
 - [x] **P1-S11 Color modes**
   Cluster, complexity, and churn modes using mock metrics.
   DoD: mode switch recolors without re-layout, legend updates.
-- [~] **P1-S12 States and responsiveness**
+- [x] **P1-S12 States and responsiveness**
   Loading, empty, and error states, keyboard accessibility for panels, mobile layout for non-canvas UI.
   DoD: every async view has the three states, Lighthouse accessibility check recorded.
-- [~] **P1-S13 Frontend tests and demo**
+- [x] **P1-S13 Frontend tests and demo**
   Vitest for store and graph utilities, one Playwright smoke test (load, select, search). Record a short demo clip.
   DoD: tests pass in CI-ready scripts, clip saved.
 
@@ -70,7 +70,7 @@ Teach in this phase: React fundamentals as needed, hooks, TypeScript types, comp
 
 Teach in this phase: async Python, FastAPI dependency injection, SQLAlchemy 2 async, Alembic, Redis, ARQ, SSE, OAuth, tree-sitter, Docker Compose.
 
-- [ ] **P2-S01 API scaffold**
+- [x] **P2-S01 API scaffold**
   `apps/api` with uv, FastAPI app factory, settings, `/health`, ruff, type checker, pytest.
   DoD: `/health` returns 200, tests and linters pass. Type checker choice recorded in an ADR.
 - [ ] **P2-S02 Docker Compose**
