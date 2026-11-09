@@ -6,12 +6,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const outputPath = path.resolve(__dirname, "../apps/web/src/mocks/mock-graph.json");
 
 const CLUSTERS = [
-  { id: "core", name: "Core Engine", color: "#3b82f6", prefix: "src/core" },
-  { id: "api", name: "API & Routing", color: "#10b981", prefix: "src/api" },
-  { id: "db", name: "Database & Models", color: "#8b5cf6", prefix: "src/db" },
-  { id: "services", name: "Services", color: "#f59e0b", prefix: "src/services" },
-  { id: "ui", name: "UI Components", color: "#ec4899", prefix: "src/ui" },
-  { id: "utils", name: "Utilities", color: "#06b6d4", prefix: "src/utils" },
+  { id: "core", name: "Core Engine", color: "#e7b96e", prefix: "src/core" },
+  { id: "api", name: "API & Routing", color: "#79b9a2", prefix: "src/api" },
+  { id: "db", name: "Database & Models", color: "#b6bbd2", prefix: "src/db" },
+  { id: "services", name: "Services", color: "#ed886c", prefix: "src/services" },
+  { id: "ui", name: "UI Components", color: "#a8bf75", prefix: "src/ui" },
+  { id: "utils", name: "Utilities", color: "#71b7ca", prefix: "src/utils" },
 ];
 
 const NODES_PER_CLUSTER = 25; // 6 * 25 = 150 total nodes

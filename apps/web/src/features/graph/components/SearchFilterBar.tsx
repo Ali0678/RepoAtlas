@@ -23,8 +23,7 @@ export function SearchFilterBar({ graph, className }: SearchFilterBarProps) {
   const clearFilters = useGraphStore((s) => s.clearFilters);
 
   const totalNodes = graph.nodes.length;
-  const matchCount =
-    matchingNodeIds === null ? totalNodes : matchingNodeIds.size;
+  const matchCount = matchingNodeIds === null ? totalNodes : matchingNodeIds.size;
 
   const filtersActive = isFilterActive({
     query: searchQuery,
@@ -46,6 +45,8 @@ export function SearchFilterBar({ graph, className }: SearchFilterBarProps) {
     >
       {/* Controlled search input: the store is the single source of truth */}
       <Input
+        id="graph-search"
+        aria-label="Search files and symbols"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         placeholder="Search by path or symbol..."
@@ -97,13 +98,9 @@ export function SearchFilterBar({ graph, className }: SearchFilterBarProps) {
                   className="h-3 w-3 shrink-0 rounded-full shadow-sm"
                   style={{ backgroundColor: cluster.color }}
                 />
-                <span className="font-medium text-text-primary">
-                  {cluster.name}
-                </span>
+                <span className="font-medium text-text-primary">{cluster.name}</span>
               </div>
-              <span className="font-mono text-text-muted">
-                {cluster.nodeCount}
-              </span>
+              <span className="font-mono text-text-muted">{cluster.nodeCount}</span>
             </button>
           );
         })}
@@ -111,7 +108,7 @@ export function SearchFilterBar({ graph, className }: SearchFilterBarProps) {
 
       {/* Live match counter and reset */}
       <div className="flex items-center justify-between border-t border-border-subtle/80 pt-2.5">
-        <span className="font-mono text-[11px] text-text-muted">
+        <span role="status" className="font-mono text-[11px] text-text-muted">
           {matchCount} / {totalNodes} files
         </span>
         {filtersActive ? (

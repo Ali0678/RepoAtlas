@@ -8,7 +8,13 @@
     "start": "next start",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
-    "format": "prettier --check ."
+    "format": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:demo": "node ../../scripts/record-demo.mjs",
+    "check": "pnpm lint && pnpm type-check && pnpm test && pnpm build",
+    "audit:a11y": "pnpm dlx lighthouse http://localhost:3000/explore --only-categories=accessibility --chrome-flags=\"--headless --no-sandbox --enable-unsafe-swiftshader\" --output=json --output=html --output-path=../../docs/artifacts/lighthouse"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -24,14 +30,18 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@tailwindcss/postcss": "^4.0.0",
+    "@testing-library/react": "^16.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.0.0",
+    "jsdom": "^25.0.0",
     "postcss": "^8.4.49",
     "prettier": "^3.5.0",
     "tailwindcss": "^4.0.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^2.0.0",
+    "playwright": "^1.62.1"
   }
 }

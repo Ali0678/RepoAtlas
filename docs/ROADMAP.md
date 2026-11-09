@@ -56,13 +56,13 @@ Teach in this phase: React fundamentals as needed, hooks, TypeScript types, comp
 - [x] **P1-S10 Impact mode UI**
   Select a node, choose depth, highlight dependents by depth with a ripple effect (mock computation on the client).
   DoD: depth slider updates highlights, legend explains depth colors.
-- [ ] **P1-S11 Color modes**
+- [x] **P1-S11 Color modes**
   Cluster, complexity, and churn modes using mock metrics.
   DoD: mode switch recolors without re-layout, legend updates.
-- [ ] **P1-S12 States and responsiveness**
+- [~] **P1-S12 States and responsiveness**
   Loading, empty, and error states, keyboard accessibility for panels, mobile layout for non-canvas UI.
   DoD: every async view has the three states, Lighthouse accessibility check recorded.
-- [ ] **P1-S13 Frontend tests and demo**
+- [~] **P1-S13 Frontend tests and demo**
   Vitest for store and graph utilities, one Playwright smoke test (load, select, search). Record a short demo clip.
   DoD: tests pass in CI-ready scripts, clip saved.
 

@@ -173,7 +173,7 @@ API_ORIGIN=http://localhost:8000
 | sigma | 3.0.3 | P1-S03 |
 | graphology | 0.26.0 | P1-S03 |
 | graphology-layout-forceatlas2 | 0.10.1 | P1-S04 |
-| zustand | 5.0.3 | P1-S05 |
+| zustand | 5.0.15 (lockfile) | checked 2026-11-09 |
 | Python | 3.14.7 | P0-S01 |
 | uv | 0.13.0 | P0-S01 |
 | FastAPI | | |
@@ -185,3 +185,7 @@ API_ORIGIN=http://localhost:8000
 | anthropic SDK | | |
 | PostgreSQL / pgvector | | |
 | Redis | | |
+
+Frontend test tooling update (2026-11-09): `playwright` is declared at ^1.62.1 and imports its bundled runner from `playwright/test`. Version 1.62.1 and runner APIs were checked against the available runtime source; project dependency installation and lockfile resolution remain pending. Vitest, jsdom, and Testing Library retain the declarations from the interrupted S13 work; their resolved versions must be recorded after installation. Lighthouse is invoked with `pnpm dlx lighthouse` for a local audit, not shipped in the app.
+
+Installed test versions reported by Ali on 2026-11-09: Playwright 1.65.0, Vitest 2.1.9, jsdom 25.0.1, Testing Library React 16.3.3. `allowBuilds.esbuild: true` permits esbuild's platform binary setup. GraphCanvas uses a browser-only Next dynamic import because sigma accesses WebGL globals at module initialization.

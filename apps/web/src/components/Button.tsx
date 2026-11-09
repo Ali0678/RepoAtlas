@@ -1,8 +1,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "ghost" | "danger";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
@@ -19,11 +18,10 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-surface-base disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer rounded-md";
+    "inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-surface-base disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer rounded-sm";
 
   const variants = {
-    primary:
-      "bg-accent text-white hover:bg-accent-hover active:bg-accent-hover/90",
+    primary: "bg-accent text-surface-base hover:bg-accent-hover active:bg-accent-hover/90",
     secondary:
       "bg-surface-elevated text-text-primary border border-border-subtle hover:bg-surface-hover hover:border-border-focus active:bg-surface-panel",
     ghost:

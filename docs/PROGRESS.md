@@ -4,10 +4,10 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 
 ## Current status
 
-- Phase: 1 (Frontend with mock data)
-- Current step: P1-S11 (not started)
-- Last completed step: P1-S10
-- Last updated: 2026-11-08
+- Phase: 1 (Frontend with mock data) — S12/S13 implementation finished, verification pending
+- Current step: P1-S12 (verification); P1-S13 implementation prepared at Ali’s request
+- Last completed step: P1-S11
+- Last updated: 2026-11-09
 
 ## Environment facts
 
@@ -44,18 +44,31 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 | P1-S08 | 2026-10-21 | Pulsing edge flow, active node glow, zoom-based label rules, dev FPS meter | 903b864 |
 | P1-S09 | 2026-11-08 | Collapsible chat panel, token streaming simulation, interactive citation chips | pending |
 | P1-S10 | 2026-11-08 | Blast radius impact analysis: reverse BFS, depth slider, depth gradient palette, metrics | pending |
+| P1-S11 | 2026-11-08 | Color modes (cluster, complexity, churn), dynamic nodeReducer recoloring, adaptive legend | pending |
+| P1-S12 | 2026-11-09 | Implementation ready: async states, WebGL error boundary, focus management, responsive sidebar/chat, keyboard fixes; browser/a11y verification pending | pending |
+| P1-S13 | 2026-11-09 | Implementation ready: six Vitest suites, Chromium desktop/mobile smoke tests, demo recording script; full execution pending | pending |
+
+## Visual redesign (2026-11-09)
+
+- Ali authorized a cartographic redesign outside the current roadmap step. Rebuilt landing page and shared typography/palette; themed workspace and graph, with matching generator colors. ADR-015 records the design.
+- Lint, full TypeScript, and 56 unit tests pass after redesign. Browser preview was unavailable; visual and responsive review remain pending.
 
 ## Decisions made since the last update
 
-- none (no new ADRs this step)
+- ADR-014: browser smoke tests exercise real sigma/WebGL; component tests isolate async states and focus behavior.
 
 ## Open questions
 
-- none
+- Ali must confirm verification results before S12/S13 close and P2-S01 starts.
 
 ## Known issues and tech debt
 
-- none
+- Ali installed test dependencies and Chromium. Lint, full type checking, and all 56 unit tests pass (also rerun by the AI after the fix).
+- Production prerendering exposed sigma importing WebGL globals on the server. Fixed with a browser-only dynamic GraphCanvas import; local build rerun pending. The assistant's Turbopack build attempt is blocked by sandbox port-binding permissions.
+- esbuild's interrupted build permission placeholder was changed to true; run `pnpm rebuild esbuild` locally.
+- Browser smoke, Lighthouse, and demo remain pending. See `docs/FRONTEND_VERIFICATION.md`.
+- Existing architecture gaps outside S12/S13 remain: component-effect graph fetching (TanStack Query planned in P2-S11), timed layout stop without position caching, mock node citations must become validated chunk citations in P3.
+
 
 ## Metrics log (real numbers for resume and README)
 

@@ -104,3 +104,17 @@ Status: Proposed (decide in P3-S04)
 Context: Cost and quality differ by task.
 Decision: To be made in P3-S04 using the current model list in the official Anthropic docs. Direction: smaller model for summaries and bulk work, stronger model for Q&A and agent.
 Consequences: Model IDs live in config, never hardcoded in logic.
+
+## ADR-014: Separate component checks from real graph browser checks
+Status: Accepted
+Context: jsdom cannot prove sigma WebGL, worker layout, camera navigation, or responsive browser focus behavior.
+Decision: Vitest covers pure graph/store logic, async UI states, and keyboard handling; Playwright Chromium covers the real canvas, citation selection, search, and mobile drawer/chat. Use the runner exported by `playwright/test`. Record a passing desktop smoke test as the short demo. Keep one sidebar instance across viewport sizes so hidden duplicate panels do not run effects.
+Alternatives: Mock sigma in every test (misses integration failures); render WebGL in jsdom (not a real browser); two mounted sidebar copies (duplicates IDs, effects, and focus targets).
+Consequences: Browser checks require a Chromium install and production build. A Lighthouse accessibility report and manual keyboard review remain separate evidence. S12/S13 stay in progress until those checks run and Ali confirms.
+
+## ADR-015: Cartographic frontend identity
+Status: Accepted (Ali authorized the visual redesign on 2026-11-09)
+Context: The frontend lacked a distinctive identity connected to repository exploration.
+Decision: Treat RepoAtlas as a survey atlas: deep green surfaces, warm paper text, vermilion actions, mineral cluster colors, Fraunces display typography, Manrope UI typography, and IBM Plex Mono annotations. The landing illustration uses the mock graph itself. Keep complexity/churn risk colors semantically distinct. Label mock functionality explicitly.
+Alternatives: Generic dashboard cards (weak connection to the product); ornamental 3D backgrounds (rendering cost without helping navigation).
+Consequences: Shared tokens theme existing panels. Generator and mock graph palettes stay synchronized. Fonts remain served through next/font/google and need network access at build time. Visual browser and mobile review remain pending; lint, full TypeScript, and all 56 unit tests pass.

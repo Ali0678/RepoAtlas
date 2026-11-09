@@ -18,15 +18,19 @@ import type { RepoGraph, GraphNode } from "@/types/graph";
 export interface GraphCanvasProps {
   data: RepoGraph;
   className?: string;
+  // Optional external ref written by this component on mount.
+  // The explore page passes its globalSigmaRef so the keyboard shortcuts
+  // hook can read the renderer without prop drilling.
+  sigmaRef?: React.RefObject<Sigma | null>;
 }
 
 // Edge flow colors: pulse between a deep blue and a bright highlight.
-const EDGE_FLOW_BASE = "#1e40af";
-const EDGE_FLOW_PEAK = "#93c5fd";
+const EDGE_FLOW_BASE = "#9f5139";
+const EDGE_FLOW_PEAK = "#ffd5a0";
 // Active node pulses toward a pale blue, keeping cluster color visible.
-const NODE_GLOW_TARGET = "#dbeafe";
+const NODE_GLOW_TARGET = "#fff1c9";
 
-export function GraphCanvas({ data, className }: GraphCanvasProps) {
+export function GraphCanvas({ data, className, sigmaRef: externalSigmaRef }: GraphCanvasProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const sigmaRef = React.useRef<Sigma | null>(null);
   const layoutRef = React.useRef<FA2Layout | null>(null);
@@ -64,10 +68,10 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
       renderEdgeLabels: false,
       minCameraRatio: 0.05,
       maxCameraRatio: 15,
-      defaultNodeColor: "#3b82f6",
-      defaultEdgeColor: "#27272a",
-      labelFont: "var(--font-sans), system-ui, sans-serif",
-      labelColor: { color: "#f4f4f5" },
+      defaultNodeColor: "#f07853",
+      defaultEdgeColor: "#4a6050",
+      labelFont: "Manrope, sans-serif",
+      labelColor: { color: "#ede8d8" },
       labelSize: 11,
       labelWeight: "500",
       labelRenderedSizeThreshold: 10,
@@ -76,6 +80,8 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
     });
 
     sigmaRef.current = renderer;
+    // Also populate the external ref so the keyboard hook can read the camera
+    if (externalSigmaRef) externalSigmaRef.current = renderer;
 
     // 3. Register Sigma visual reducers for filter, hover and selection highlighting
     renderer.setSetting("nodeReducer", (node, nodeData) => {
@@ -87,7 +93,7 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
       if (state.matchingNodeIds !== null && !state.matchingNodeIds.has(node)) {
         return {
           ...nodeData,
-          color: "#18191e",
+          color: "#24312b",
           label: "",
           zIndex: 0,
         };
@@ -109,8 +115,7 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
 
         const depth = state.impactedNodes.get(node);
         if (depth !== undefined && depth > 0) {
-          const depthColor =
-            DEPTH_COLORS[depth as keyof typeof DEPTH_COLORS] ?? "#eab308";
+          const depthColor = DEPTH_COLORS[depth as keyof typeof DEPTH_COLORS] ?? "#eab308";
           return {
             ...nodeData,
             highlighted: false,
@@ -124,7 +129,7 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
         // Unaffected node in impact mode: dim out
         return {
           ...nodeData,
-          color: "#18191e",
+          color: "#24312b",
           label: "",
           zIndex: 0,
         };
@@ -176,7 +181,7 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
       // Dim non-neighbor nodes
       return {
         ...nodeData,
-        color: "#18191e",
+        color: "#24312b",
         label: "",
         zIndex: 1,
       };
@@ -189,23 +194,18 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
       // Filter layer: an edge survives only when both of its endpoints survive.
       if (
         state.matchingNodeIds !== null &&
-        (!state.matchingNodeIds.has(source) ||
-          !state.matchingNodeIds.has(target))
+        (!state.matchingNodeIds.has(source) || !state.matchingNodeIds.has(target))
       ) {
         return { ...edgeData, hidden: true };
       }
 
       // --- Impact Mode Layer ---
       if (state.impactTargetId) {
-        const targetDepth =
-          target === state.impactTargetId ? 0 : state.impactedNodes.get(target);
-        const sourceDepth =
-          source === state.impactTargetId ? 0 : state.impactedNodes.get(source);
+        const targetDepth = target === state.impactTargetId ? 0 : state.impactedNodes.get(target);
+        const sourceDepth = source === state.impactTargetId ? 0 : state.impactedNodes.get(source);
 
         const isImpactEdge =
-          targetDepth !== undefined &&
-          sourceDepth !== undefined &&
-          sourceDepth === targetDepth + 1;
+          targetDepth !== undefined && sourceDepth !== undefined && sourceDepth === targetDepth + 1;
 
         if (isImpactEdge) {
           const flow = pulseIntensity(flowPhaseRef.current, phaseOffsetFor(edge));
@@ -230,8 +230,7 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
         // Per-edge phase offset makes each edge pulse on its own rhythm,
         // reading as energy moving through the neighborhood.
         const amplitude = state.hoveredNodeId ? 0.5 : 1;
-        const flow =
-          pulseIntensity(flowPhaseRef.current, phaseOffsetFor(edge)) * amplitude;
+        const flow = pulseIntensity(flowPhaseRef.current, phaseOffsetFor(edge)) * amplitude;
         return {
           ...edgeData,
           color: interpolateColor(EDGE_FLOW_BASE, EDGE_FLOW_PEAK, flow),
@@ -265,10 +264,9 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
 
       const nodePosition = renderer.getNodeDisplayData(node);
       if (nodePosition) {
-        renderer.getCamera().animate(
-          { x: nodePosition.x, y: nodePosition.y, ratio: 0.18 },
-          { duration: 450 }
-        );
+        renderer
+          .getCamera()
+          .animate({ x: nodePosition.x, y: nodePosition.y, ratio: 0.18 }, { duration: 450 });
       }
       renderer.refresh();
     });
@@ -309,8 +307,12 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
       layoutRef.current = null;
       renderer.kill();
       sigmaRef.current = null;
+      if (externalSigmaRef) externalSigmaRef.current = null;
     };
-  }, [data]);
+    // externalSigmaRef is a RefObject — its identity is stable and adding it to
+    // the dep array would have no behavioral effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, clusterColorMap]);
 
   // Sync camera when selectedNodeId changes externally (e.g. from sidebar navigation)
   React.useEffect(() => {
@@ -319,10 +321,9 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
 
     const nodePosition = renderer.getNodeDisplayData(selectedNodeId);
     if (nodePosition) {
-      renderer.getCamera().animate(
-        { x: nodePosition.x, y: nodePosition.y, ratio: 0.18 },
-        { duration: 450 }
-      );
+      renderer
+        .getCamera()
+        .animate({ x: nodePosition.x, y: nodePosition.y, ratio: 0.18 }, { duration: 450 });
     }
     renderer.refresh();
   }, [selectedNodeId]);
@@ -334,10 +335,9 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
 
     const nodePosition = renderer.getNodeDisplayData(impactTargetId);
     if (nodePosition) {
-      renderer.getCamera().animate(
-        { x: nodePosition.x, y: nodePosition.y, ratio: 0.22 },
-        { duration: 450 }
-      );
+      renderer
+        .getCamera()
+        .animate({ x: nodePosition.x, y: nodePosition.y, ratio: 0.22 }, { duration: 450 });
     }
     renderer.refresh();
   }, [impactTargetId]);
@@ -358,7 +358,10 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
     const renderer = sigmaRef.current;
     if (!renderer) return;
 
-    if (!hoveredNodeId && !selectedNodeId && !impactTargetId) {
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      (!hoveredNodeId && !selectedNodeId && !impactTargetId)
+    ) {
       renderer.refresh();
       return;
     }
@@ -429,11 +432,7 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
   }
 
   return (
-    <div
-      className={`relative w-full h-full overflow-hidden bg-surface-base ${
-        className ?? ""
-      }`}
-    >
+    <div className={`atlas-terrain relative w-full h-full overflow-hidden ${className ?? ""}`}>
       {/* WebGL Canvas Target */}
       <div ref={containerRef} className="w-full h-full" />
 
@@ -455,13 +454,21 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
           {isLayoutRunning ? (
             <>
               <svg className="w-4 h-4 text-accent" fill="currentColor" viewBox="0 0 24 24">
-                <path fillRule="evenodd" d="M6.75 5.25a.75.75 0 01.75.75v12a.75.75 0 01-1.5 0v-12a.75.75 0 01.75-.75zm10.5 0a.75.75 0 01.75.75v12a.75.75 0 01-1.5 0v-12a.75.75 0 01.75-.75z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M6.75 5.25a.75.75 0 01.75.75v12a.75.75 0 01-1.5 0v-12a.75.75 0 01.75-.75zm10.5 0a.75.75 0 01.75.75v12a.75.75 0 01-1.5 0v-12a.75.75 0 01.75-.75z"
+                  clipRule="evenodd"
+                />
               </svg>
               <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-accent animate-ping" />
             </>
           ) : (
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z"
+                clipRule="evenodd"
+              />
             </svg>
           )}
         </button>
@@ -497,7 +504,12 @@ export function GraphCanvas({ data, className }: GraphCanvasProps) {
           className="flex h-8 w-8 items-center justify-center rounded text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors cursor-pointer"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+            />
           </svg>
         </button>
       </div>
