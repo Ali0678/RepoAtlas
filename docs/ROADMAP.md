@@ -76,7 +76,7 @@ Teach in this phase: async Python, FastAPI dependency injection, SQLAlchemy 2 as
 - [x] **P2-S02 Docker Compose**
   Postgres (pgvector image), Redis, api, worker placeholder. `.env.example`.
   DoD: `docker compose up` brings up all services, api connects to both.
-- [ ] **P2-S03 Database models and migrations**
+- [x] **P2-S03 Database models and migrations**
   Models for users, repos, analyses, files, symbols, edges. Alembic initial migration. Chunks table added in P3.
   DoD: migration applies and rolls back cleanly, model tests pass.
 - [ ] **P2-S04 GitHub OAuth and sessions**

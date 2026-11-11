@@ -17,6 +17,8 @@ RUN uv sync --locked --no-dev --no-cache
 RUN useradd --create-home --uid 10001 appuser
 
 COPY app ./app
+COPY alembic.ini ./
+COPY alembic ./alembic
 
 USER appuser
 

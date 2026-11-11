@@ -5,9 +5,9 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 ## Current status
 
 - Phase: 2 (Backend and ingestion); Phase 1 complete, confirmed by Ali
-- Current step: P2-S03 (not started)
-- Last completed step: P2-S02
-- Last updated: 2026-11-09
+- Current step: P2-S04 (not started)
+- Last completed step: P2-S03
+- Last updated: 2026-11-11
 
 ## Environment facts
 
@@ -49,6 +49,7 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 | P1-S13 | 2026-11-09 | Frontend tests and demo tooling; S13 verification confirmed by Ali | pending |
 | P2-S01 | 2026-11-09 | FastAPI factory, validated settings, /health confirmed by Ali; lint, formatting, mypy and 5 tests passed; ADR-016 | pending |
 | P2-S02 | 2026-11-09 | Compose services, connection lifecycle, worker placeholder; 18 tests and quality checks pass; live health/shutdown confirmed by Ali | pending |
+| P2-S03 | 2026-11-11 | Six PostgreSQL models, async SQLAlchemy sessions, Alembic revision 0001, and live migration and constraint checks; ADR-018 | pending |
 
 ## Visual redesign (2026-11-09)
 
@@ -62,14 +63,20 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 - Ruff lint, formatting, strict mypy (17 files), and all 18 tests passed. New tests use simulated clients to cover startup errors, normal shutdown, cleanup failures, cancellation, and worker signal handling.
 - Compose configuration validates. Ali confirmed all four services run, /health returns 200, and the worker stops cleanly. Understanding check completed: service-name addressing and health-gated startup.
 
+## P2-S03 verification (2026-11-11)
+
+- Initial revision 0001 was generated from the six model definitions after restoring the Alembic template. The PostgreSQL model check is in `apps/api/tests/postgres_schema_check.py`.
+- Ruff, formatting, strict mypy (29 files), and all 18 unit tests passed. Alembic rendered upgrade and downgrade SQL offline. The rendered upgrade includes both composite edge foreign keys.
+- Ali confirmed the disposable PostgreSQL upgrade, downgrade, and re-upgrade, live model checks, development upgrade, and /health response.
+
 ## Decisions made since the last update
 
-- ADR-017: container networking, health-gated startup, and shared API/worker image.
+- ADR-018: async SQLAlchemy lifecycle, Alembic migrations, and database-enforced analysis boundaries.
 - P2-S01 checks executed successfully on 2026-11-09. Pydantic plugin and explicit pytest-asyncio fixture loop scope fixed the reported tooling issues. Ali requested proceeding directly to the next step.
 
 ## Open questions
 
-- None blocking P2-S03. Ali confirmed S12/S13 verification; exact Lighthouse scores and demo evidence were not supplied in chat and are not invented here.
+- None blocking P2-S04. Ali confirmed S12/S13 verification; exact Lighthouse scores and demo evidence were not supplied in chat and are not invented here.
 
 ## Known issues and tech debt
 

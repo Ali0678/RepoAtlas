@@ -178,8 +178,8 @@ API_ORIGIN=http://localhost:8000
 | uv | 0.13.0 | P0-S01 |
 | FastAPI | 0.162.2 | P2-S01 |
 | Pydantic | 2.14.3 | P2-S01 |
-| SQLAlchemy | | |
-| Alembic | | |
+| SQLAlchemy | 2.1.8 | P2-S03 |
+| Alembic | 1.20.1 | P2-S03 |
 | ARQ | | |
 | tree-sitter | | |
 | anthropic SDK | | |
