@@ -3,7 +3,7 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from redis.asyncio import Redis
+from arq.connections import ArqRedis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
@@ -14,14 +14,14 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def connected_services(settings: Settings) -> AsyncIterator[tuple[AsyncEngine, Redis]]:
+async def connected_services(settings: Settings) -> AsyncIterator[tuple[AsyncEngine, ArqRedis]]:
     engine = create_database_engine(str(settings.database_url))
     try:
         async with asyncio.timeout(10), engine.connect() as connection:
             if await connection.scalar(text("SELECT 1")) != 1:
                 raise RuntimeError("PostgreSQL connection check failed")
 
-        redis_client: Redis = Redis.from_url(
+        redis_client: ArqRedis = ArqRedis.from_url(
             str(settings.redis_url),
             socket_connect_timeout=5,
             socket_timeout=5,

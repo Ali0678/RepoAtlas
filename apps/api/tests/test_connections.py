@@ -24,7 +24,7 @@ def clients(monkeypatch: pytest.MonkeyPatch) -> Clients:
     redis = Mock(ping=AsyncMock(return_value=True), aclose=AsyncMock())
     redis_factory = Mock(return_value=redis)
     monkeypatch.setattr(connections, "create_database_engine", Mock(return_value=engine))
-    monkeypatch.setattr("app.core.connections.Redis.from_url", redis_factory)
+    monkeypatch.setattr("app.core.connections.ArqRedis.from_url", redis_factory)
     return Clients(engine, connection, redis, redis_factory)
 
 
