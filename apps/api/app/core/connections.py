@@ -14,14 +14,14 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def connected_services(settings: Settings) -> AsyncIterator[AsyncEngine]:
+async def connected_services(settings: Settings) -> AsyncIterator[tuple[AsyncEngine, Redis]]:
     engine = create_database_engine(str(settings.database_url))
     try:
         async with asyncio.timeout(10), engine.connect() as connection:
             if await connection.scalar(text("SELECT 1")) != 1:
                 raise RuntimeError("PostgreSQL connection check failed")
 
-        redis_client = Redis.from_url(
+        redis_client: Redis = Redis.from_url(
             str(settings.redis_url),
             socket_connect_timeout=5,
             socket_timeout=5,
@@ -31,7 +31,7 @@ async def connected_services(settings: Settings) -> AsyncIterator[AsyncEngine]:
                 await redis_client.ping()
 
             logger.info("PostgreSQL and Redis connection checks passed")
-            yield engine
+            yield engine, redis_client
         finally:
             async with asyncio.timeout(5):
                 await redis_client.aclose()

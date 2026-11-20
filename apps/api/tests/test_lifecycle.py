@@ -6,6 +6,8 @@ from unittest.mock import Mock
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncEngine
 
 from app import main as api_main
 from app.core.config import Settings
@@ -18,15 +20,17 @@ async def test_api_lifespan_controls_service_context(
 ) -> None:
     events: list[str] = []
     settings = Settings(_env_file=None)
+    engine = Mock(spec=AsyncEngine)
+    redis_client = Mock(spec=Redis)
 
     @asynccontextmanager
-    async def services(configuration: Settings) -> AsyncIterator[None]:
+    async def services(configuration: Settings) -> AsyncIterator[tuple[AsyncEngine, Redis]]:
         assert configuration is settings
         events.append("starting")
         if fails:
             raise ConnectionError("services unavailable")
         try:
-            yield
+            yield engine, redis_client
         finally:
             events.append("closed")
 
@@ -39,12 +43,14 @@ async def test_api_lifespan_controls_service_context(
         assert events == ["starting"]
     else:
         async with application.router.lifespan_context(application):
+            assert application.state.redis_client is redis_client
             async with AsyncClient(
                 transport=ASGITransport(app=application), base_url="http://test"
             ) as client:
                 assert (await client.get("/health")).json() == {"status": "ok"}
             assert events == ["starting"]
         assert events == ["starting", "closed"]
+        assert not hasattr(application.state, "redis_client")
 
 
 @pytest.mark.parametrize("fails", [False, True])

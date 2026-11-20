@@ -29,8 +29,9 @@ def clients(monkeypatch: pytest.MonkeyPatch) -> Clients:
 
 
 async def test_connections_stay_open_until_context_exits(clients: Clients) -> None:
-    async with connections.connected_services(Settings(_env_file=None)) as engine:
+    async with connections.connected_services(Settings(_env_file=None)) as (engine, redis_client):
         assert engine is clients.engine
+        assert redis_client is clients.redis
         clients.connection.scalar.assert_awaited_once()
         assert str(clients.connection.scalar.call_args.args[0]) == "SELECT 1"
         clients.engine.connect.return_value.__aexit__.assert_awaited_once()

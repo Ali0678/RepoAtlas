@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import AnyHttpUrl, PostgresDsn, RedisDsn
+from pydantic import AnyHttpUrl, PostgresDsn, RedisDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
@@ -22,3 +22,5 @@ class Settings(BaseSettings):
         "postgresql+asyncpg://postgres:postgres@localhost:5432/repoatlas"
     )
     redis_url: RedisDsn = RedisDsn("redis://localhost:6379/0")
+    github_client_id: str = ""
+    github_client_secret: SecretStr = SecretStr("")
