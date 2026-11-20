@@ -180,7 +180,7 @@ API_ORIGIN=http://localhost:8000
 | Pydantic | 2.14.3 | P2-S01 |
 | SQLAlchemy | 2.1.8 | P2-S03 |
 | Alembic | 1.20.1 | P2-S03 |
-| ARQ | | |
+| ARQ | 0.28.0 | P2-S05 |
 | tree-sitter | | |
 | anthropic SDK | | |
 | PostgreSQL / pgvector | | |
@@ -193,3 +193,5 @@ Installed test versions reported by Ali on 2026-11-09: Playwright 1.65.0, Vitest
 P2-S01 resolved tools (2026-11-09): Python 3.14.8, pydantic-settings 2.16.2, Uvicorn 0.54.0, Ruff 0.17.4, mypy 2.4.1, pytest 9.2.0, pytest-asyncio 1.4.1.post1, httpx 0.28.1. Backend typing uses strict mypy with pydantic.mypy (ADR-016).
 
 P2-S02 clients: asyncpg 0.32.0, asyncpg-stubs 0.32.0, redis Python client 8.1.0. Container tags: python:3.14-slim-trixie, ghcr.io/astral-sh/uv:0.13.0, pgvector/pgvector:pg18, redis:8-alpine. Tags can move; exact PostgreSQL/pgvector/Redis server patch versions and image digests have not been captured. PostgreSQL 18 data is persisted at /var/lib/postgresql.
+
+P2-S04 made httpx 0.28.1 a runtime dependency for GitHub OAuth. P2-S05 pins ARQ 0.28.0 and resolves the Python Redis client to 5.3.1 for ARQ compatibility.

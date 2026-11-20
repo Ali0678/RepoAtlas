@@ -139,3 +139,15 @@ Context: Repository analyses need a versioned schema and database-enforced owner
 Decision: Use typed SQLAlchemy models, a bounded async engine per API or worker process, and an API session factory. Apply schema changes explicitly through Alembic. Give rows UUIDs, store analysis statistics as JSONB, enforce unique repository snapshots and file paths, and use composite foreign keys to keep both endpoints of an edge within its analysis.
 Alternatives: Automatic table creation at application startup or application-only enforcement of analysis boundaries.
 Consequences: Migration execution is an explicit deployment step. Revision 0001 creates six tables. The disposable PostgreSQL check verifies valid inserts, defaults, duplicate rejection, and cross-analysis edge rejection. Ali confirmed the migration round trip and development upgrade.
+
+## ADR-019: Browser-bound OAuth and revocable sessions
+
+**Status** Accepted
+
+The GitHub OAuth flow uses PKCE and a one-time state bound to a browser cookie. The API consumes the state atomically in Redis and upserts the GitHub user in PostgreSQL. An opaque session ID goes in an HttpOnly cookie, and Redis stores the user ID under a hash of the session ID. Logout deletes that entry. Trusted-origin checks protect state-changing routes. This implements the server-side session choice in ADR-012 and makes Redis availability necessary for authenticated requests.
+
+## ADR-020: Idempotent analysis submission and enqueue retries
+
+**Status** Accepted
+
+An analysis represents one public repository at an exact commit. The API resolves the default branch SHA through GitHub and gets or creates the analysis row in a PostgreSQL transaction. It enqueues a job after the transaction commits and uses the analysis ID as the ARQ job ID. If enqueueing fails, the API returns 503 and a later submission can retry the same queued row. Enqueueing only on insert would strand that row. P2-S06 adds the job consumer.

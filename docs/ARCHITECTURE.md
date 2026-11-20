@@ -221,7 +221,7 @@ Exceeding a limit produces a clear `failed` status with a human-readable reason,
 |---|---|
 | Worker crashes mid-job | Job is retried by ARQ. Pipeline stages are idempotent and clear partial rows for the analysis before rewriting. |
 | Clone fails or times out | Analysis marked `failed` with reason. No retry for permanent errors (404, too large). |
-| Duplicate submissions | Unique constraint on `(repo_id, commit_sha)` plus enqueue only on insert. |
+| Duplicate submissions | A unique constraint on `(repo_id, commit_sha)` reuses the analysis row. A queued row can be submitted again after an enqueue failure. The API uses its analysis ID as the ARQ job ID to deduplicate enqueue attempts. |
 | LLM API error or timeout | Bounded retries with backoff, then a clear error event on the SSE stream. |
 | Invalid citation from model | Dropped, logged, counted in eval metrics. |
 | Redis unavailable | API returns 503 for job-dependent routes. Reads from Postgres still work. |

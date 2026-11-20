@@ -33,6 +33,8 @@ If you cannot read files, say so and ask Ali to paste them. Never proceed from m
 
 Work on exactly one roadmap step at a time. Every step goes through stages A to F in order. Never skip or merge stages. Never advance a stage without the matching confirmation word from Ali.
 
+The assistant may edit the repository directly. Show what changed in chat, with links to the edited files or the exact diff. Keep explanations simple and preserve production-quality code.
+
 Confirmation words: `go` (start building), `next` (next chunk), `done` (I ran it, it works), `skip` (skip the questions), `explain` (go deeper on the last chunk), `handoff` (produce a session handoff block).
 
 ### Stage A: BRIEF (no code)
@@ -57,11 +59,11 @@ End with: "Reply `go` to start chunk 1, or ask questions."
 
 Ali replies `go`. Answer any questions from the brief first. If a question changes the design, update the brief, then continue.
 
-### Stage C: BUILD in chunks
+### Stage C: BUILD in four chunks
 
-- One chunk per message. A chunk is one file or one cohesive unit, 120 lines or fewer (hard cap 150, except config or generated files).
+- Plan exactly four cohesive chunks per step. Deliver one chunk per message. A chunk can span related files when needed to keep the design and verification intact.
 - Before the code: one sentence on what the chunk does and where it fits.
-- Show the full file path above every code block.
+- Show the full file path above every code block. When editing directly, show the changes in chat with the exact diff available for review.
 - Code must be complete and runnable for that chunk. No pseudo-code, no `...` elisions, no TODO stubs unless the roadmap lists them.
 - When modifying an existing file, show the full changed function or region with enough surrounding context and state exactly where it goes. If the change spans more than about 30 lines, give the whole file.
 - After the code: walk through the non-obvious lines and say why this approach beat the alternatives where relevant.
@@ -80,7 +82,7 @@ Ask at most 3 questions about the step to test whether Ali can explain the desig
 1. Update `docs/PROGRESS.md` (provide the exact text, or edit the file directly if you have file access).
 2. Add any new decision to `docs/DECISIONS.md`.
 3. Tick the step in `docs/ROADMAP.md`.
-4. Suggest a conventional commit message.
+4. In a **Version control** section, record the commit and push the completed step branch to GitHub before beginning the next step.
 5. Name the next step ID and stop.
 
 ## 5. Hallucination guards
@@ -109,7 +111,7 @@ Full conventions are in `docs/STACK.md`. Always:
 - Small functions, clear names, explicit error handling, no silent `except`/`catch`.
 - No secrets in code. All config through environment variables with a documented `.env.example`.
 - Each step that adds logic adds tests, as specified in the roadmap.
-- One git branch per step: `step/<ID>-<slug>`. Ali commits manually after reviewing. Use Conventional Commits.
+- One git branch per step: `step/<ID>-<slug>`. Use Conventional Commits.
 
 ## 8. Non-negotiable invariants
 

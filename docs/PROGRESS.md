@@ -5,9 +5,9 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 ## Current status
 
 - Phase: 2 (Backend and ingestion); Phase 1 complete, confirmed by Ali
-- Current step: P2-S04 (not started)
-- Last completed step: P2-S03
-- Last updated: 2026-11-11
+- Current step: P2-S06 (brief)
+- Last completed step: P2-S05
+- Last updated: 2026-11-20
 
 ## Environment facts
 
@@ -23,9 +23,9 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 
 ## Working preferences
 
-- The AI supplies implementation code in chat, one explained chunk at a time. Ali writes and edits the codebase himself. Documentation edits require explicit authorization; Ali authorized this ROADMAP.md and PROGRESS.md update.
-- Ali normally runs the app and verification commands; the AI may run checks when explicitly requested. Ali runs all git commands. Claims of passing checks require executed results or Ali’s confirmation.
-- Each step ends with a "Version control" block listing the exact git commands to commit and push. Ali runs them.
+- The assistant may edit files directly and shows the changes in chat with file or diff links. Each step has exactly four implementation chunks with simple explanations.
+- Record verification results from checks that ran or from Ali’s confirmation.
+- Each step ends with a "Version control" section that records the commit and push to GitHub before the next step starts.
 
 ## Completed steps
 
@@ -49,7 +49,9 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 | P1-S13 | 2026-11-09 | Frontend tests and demo tooling; S13 verification confirmed by Ali | pending |
 | P2-S01 | 2026-11-09 | FastAPI factory, validated settings, /health confirmed by Ali; lint, formatting, mypy and 5 tests passed; ADR-016 | pending |
 | P2-S02 | 2026-11-09 | Compose services, connection lifecycle, worker placeholder; 18 tests and quality checks pass; live health/shutdown confirmed by Ali | pending |
-| P2-S03 | 2026-11-11 | Six PostgreSQL models, async SQLAlchemy sessions, Alembic revision 0001, and live migration and constraint checks; ADR-018 | pending |
+| P2-S03 | 2026-11-11 | Six PostgreSQL models, async SQLAlchemy sessions, Alembic revision 0001, and live migration and constraint checks | 03a6cb0 |
+| P2-S04 | Confirmed by 2026-11-20 | GitHub OAuth, Redis sessions, current-user endpoint, logout, and trusted-origin checks | 2fddb29 |
+| P2-S05 | Confirmed by 2026-11-20 | Public GitHub URL validation, default-branch SHA resolution, idempotent submission, ARQ enqueue, and status endpoint | 4efb4d4 |
 
 ## Visual redesign (2026-11-09)
 
@@ -71,17 +73,22 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 
 ## Decisions made since the last update
 
-- ADR-018: async SQLAlchemy lifecycle, Alembic migrations, and database-enforced analysis boundaries.
-- P2-S01 checks executed successfully on 2026-11-09. Pydantic plugin and explicit pytest-asyncio fixture loop scope fixed the reported tooling issues. Ali requested proceeding directly to the next step.
+- ADR-019 records browser-bound OAuth and Redis session handling.
+- ADR-020 records analysis submission and queue retries keyed by analysis ID.
+
+## P2-S04/P2-S05 verification (2026-11-20)
+
+- P2-S04 passed all 24 API tests, Ruff lint and formatting, and strict mypy. OAuth coverage uses simulated GitHub and Redis responses.
+- P2-S05 passed all 34 API tests, including concurrent submission deduplication against a disposable PostgreSQL 18 database migrated to revision 0001. Ruff lint, formatting, strict mypy, and Compose config validation also passed.
 
 ## Open questions
 
-- None blocking P2-S04. Ali confirmed S12/S13 verification; exact Lighthouse scores and demo evidence were not supplied in chat and are not invented here.
+- The worker still needs to consume the queued `analyze_repository` jobs and populate file rows in P2-S06.
 
 ## Known issues and tech debt
 
 - Ali confirmed frontend verification and authorized closing S12/S13. Earlier build and installation blockers are historical; the WebGL import and esbuild permission fixes are implemented.
-- Exact accessibility scores and demo artifact location have not been supplied in chat. The earlier verification guide contains historical pending notes; reconcile it with the actual reports when recording detailed evidence.
+- The saved Lighthouse report records 100/100 accessibility for `/explore` on 2026-11-09. The recorded desktop smoke-test demo is in `docs/artifacts/frontend-demo.webm`.
 - Existing architecture gaps outside S12/S13 remain: component-effect graph fetching (TanStack Query planned in P2-S11), timed layout stop without position caching, mock node citations must become validated chunk citations in P3.
 
 

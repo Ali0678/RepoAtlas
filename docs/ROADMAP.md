@@ -79,10 +79,10 @@ Teach in this phase: async Python, FastAPI dependency injection, SQLAlchemy 2 as
 - [x] **P2-S03 Database models and migrations**
   Models for users, repos, analyses, files, symbols, edges. Alembic initial migration. Chunks table added in P3.
   DoD: migration applies and rolls back cleanly, model tests pass.
-- [ ] **P2-S04 GitHub OAuth and sessions**
+- [x] **P2-S04 GitHub OAuth and sessions**
   Login, callback, Redis session, httpOnly cookie, `/me`, logout, CSRF protection.
   DoD: full login flow works locally, session survives refresh, logout invalidates it.
-- [ ] **P2-S05 Create analysis endpoint**
+- [x] **P2-S05 Create analysis endpoint**
   Validate GitHub URL, resolve HEAD SHA, idempotent create, enqueue job, status endpoint.
   DoD: duplicate submit returns the same analysis, invalid URLs rejected with clear errors, tests cover SSRF cases.
 - [ ] **P2-S06 Worker: clone and scan**
