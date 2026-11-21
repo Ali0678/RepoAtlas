@@ -74,6 +74,8 @@ sequenceDiagram
 
 Stages and progress events: `queued`, `cloning`, `scanning`, `parsing`, `linking`, `embedding`, `complete`, `failed`. Each event carries a percent and a message.
 
+P2-S06 saves the file inventory and its `scanned` checkpoint in one transaction. At that checkpoint the status endpoint reports `running`, with parsing and graph construction still ahead.
+
 ### 3.2 Question answering
 
 1. Browser sends `POST /api/v1/analyses/{id}/ask` with the question. Response is `text/event-stream`. The client reads it with `fetch` and a stream reader, because `EventSource` supports GET only.
@@ -188,7 +190,7 @@ Rules: all request and response bodies are Pydantic models. OpenAPI schema is th
 | Questions per user per day | configurable cap |
 | Max agent iterations | 6 |
 
-Exceeding a limit produces a clear `failed` status with a human-readable reason, never a crash.
+The worker skips individual source files over the single-file limit. Exceeding the clone size, eligible file count, or ingestion time limit sets a clear `failed` status with a human-readable reason.
 
 ## 10. Security
 

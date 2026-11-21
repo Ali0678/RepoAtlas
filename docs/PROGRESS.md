@@ -5,9 +5,9 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 ## Current status
 
 - Phase: 2 (Backend and ingestion); Phase 1 complete, confirmed by Ali
-- Current step: P2-S06 (brief)
-- Last completed step: P2-S05
-- Last updated: 2026-11-20
+- Current step: P2-S07 (pending brief)
+- Last completed step: P2-S06
+- Last updated: 2026-11-22
 
 ## Environment facts
 
@@ -52,6 +52,7 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 | P2-S03 | 2026-11-11 | Six PostgreSQL models, async SQLAlchemy sessions, Alembic revision 0001, and live migration and constraint checks | 03a6cb0 |
 | P2-S04 | Confirmed by 2026-11-20 | GitHub OAuth, Redis sessions, current-user endpoint, logout, and trusted-origin checks | 2fddb29 |
 | P2-S05 | Confirmed by 2026-11-20 | Public GitHub URL validation, default-branch SHA resolution, idempotent submission, ARQ enqueue, and status endpoint | 4efb4d4 |
+| P2-S06 | 2026-11-22 | ARQ worker fetches the pinned commit, scans eligible files, and saves the inventory with its checkpoint | b692aba |
 
 ## Visual redesign (2026-11-09)
 
@@ -75,15 +76,21 @@ This file is the project's memory. Update it at Stage F of every step. Keep it a
 
 - ADR-019 records browser-bound OAuth and Redis session handling.
 - ADR-020 records analysis submission and queue retries keyed by analysis ID.
+- ADR-021 records pinned Git fetches, tree scanning, and the transactional inventory checkpoint.
 
 ## P2-S04/P2-S05 verification (2026-11-20)
 
 - P2-S04 passed all 24 API tests, Ruff lint and formatting, and strict mypy. OAuth coverage uses simulated GitHub and Redis responses.
 - P2-S05 passed all 34 API tests, including concurrent submission deduplication against a disposable PostgreSQL 18 database migrated to revision 0001. Ruff lint, formatting, strict mypy, and Compose config validation also passed.
 
-## Open questions
+## P2-S06 verification (2026-11-21)
 
-- The worker still needs to consume the queued `analyze_repository` jobs and populate file rows in P2-S06.
+- Ruff lint, formatting, strict mypy, and Compose configuration validation passed. All 39 API tests passed with disposable PostgreSQL and Redis, covering pinned fetches, limits, cleanup, failed jobs, and repeat deliveries.
+- A real `pallets/flask` submission at `49943b5a94413a530761350f04e896f76e8d620e` reached `running / scanned` and saved 83 file rows. The Dockerized worker exited with code 0 on shutdown. Ali confirmed verification on 2026-11-22 and completed the understanding check.
+
+## Next step
+
+- P2-S07 will use the pinned snapshot and file inventory to extract symbols and imports.
 
 ## Known issues and tech debt
 

@@ -195,3 +195,5 @@ P2-S01 resolved tools (2026-11-09): Python 3.14.8, pydantic-settings 2.16.2, Uvi
 P2-S02 clients: asyncpg 0.32.0, asyncpg-stubs 0.32.0, redis Python client 8.1.0. Container tags: python:3.14-slim-trixie, ghcr.io/astral-sh/uv:0.13.0, pgvector/pgvector:pg18, redis:8-alpine. Tags can move; exact PostgreSQL/pgvector/Redis server patch versions and image digests have not been captured. PostgreSQL 18 data is persisted at /var/lib/postgresql.
 
 P2-S04 made httpx 0.28.1 a runtime dependency for GitHub OAuth. P2-S05 pins ARQ 0.28.0 and resolves the Python Redis client to 5.3.1 for ARQ compatibility.
+
+P2-S06 installs Git and TLS certificates in the backend image. The verified worker build used Git 2.47.3. ARQ 0.28.0 emits a deprecation warning when it calls the Redis client's legacy `close()` method during shutdown.

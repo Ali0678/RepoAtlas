@@ -85,7 +85,7 @@ Teach in this phase: async Python, FastAPI dependency injection, SQLAlchemy 2 as
 - [x] **P2-S05 Create analysis endpoint**
   Validate GitHub URL, resolve HEAD SHA, idempotent create, enqueue job, status endpoint.
   DoD: duplicate submit returns the same analysis, invalid URLs rejected with clear errors, tests cover SSRF cases.
-- [ ] **P2-S06 Worker: clone and scan**
+- [x] **P2-S06 Worker: clone and scan**
   ARQ worker, safe shallow clone with limits, file walk, language detection, size filtering, temp dir cleanup.
   DoD: worker populates `files` for a small repo, limits enforced, temp dirs always cleaned.
 - [ ] **P2-S07 Parsing with tree-sitter**

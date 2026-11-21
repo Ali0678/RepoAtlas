@@ -151,3 +151,11 @@ The GitHub OAuth flow uses PKCE and a one-time state bound to a browser cookie. 
 **Status** Accepted
 
 An analysis represents one public repository at an exact commit. The API resolves the default branch SHA through GitHub and gets or creates the analysis row in a PostgreSQL transaction. It enqueues a job after the transaction commits and uses the analysis ID as the ARQ job ID. If enqueueing fails, the API returns 503 and a later submission can retry the same queued row. Enqueueing only on insert would strand that row. P2-S06 adds the job consumer.
+
+## ADR-021: Scan the pinned Git tree and commit the inventory atomically
+
+**Status** Accepted
+
+The ARQ worker reads the saved commit SHA and fetches that exact snapshot into a temporary bare Git directory. It streams tracked file metadata from the Git tree, skips unsupported and oversized entries, and cleans up the directory when the job exits. Scanning a bare tree avoids materializing symlinks and other entries from a checkout.
+
+The worker replaces the inventory and sets the `scanned` checkpoint in one PostgreSQL transaction. A retry can rebuild unfinished work. A repeat delivery after the commit sees the checkpoint and preserves the saved file IDs. The analysis remains `running` at this checkpoint so later pipeline stages can finish it.
