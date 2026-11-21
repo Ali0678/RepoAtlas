@@ -2,9 +2,11 @@ import asyncio
 import signal
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+from arq.connections import ArqRedis
+from arq.worker import Worker
 from httpx import ASGITransport, AsyncClient
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -65,22 +67,32 @@ async def test_worker_shutdown_and_signal_cleanup(
     monkeypatch.setattr(loop, "add_signal_handler", register)
     monkeypatch.setattr(loop, "remove_signal_handler", unregister)
     monkeypatch.setattr(worker, "Settings", lambda: Settings(_env_file=None))
+    engine = Mock(spec=AsyncEngine)
+    redis_client = Mock(spec=ArqRedis, delete=AsyncMock(), close=AsyncMock())
 
     @asynccontextmanager
-    async def services(configuration: Settings) -> AsyncIterator[None]:
+    async def services(configuration: Settings) -> AsyncIterator[tuple[AsyncEngine, ArqRedis]]:
         if fails:
             raise ConnectionError("worker startup failed")
         try:
-            events.append("ready")
-            ready.set()
-            yield
+            yield engine, redis_client
         finally:
             events.append("closed")
 
+    async def run_worker(consumer: Worker) -> None:
+        assert consumer.pool is redis_client
+        assert list(consumer.functions) == ["analyze_repository"]
+        events.append("ready")
+        ready.set()
+        await asyncio.Future()
+
     monkeypatch.setattr(worker, "connected_services", services)
+    monkeypatch.setattr(Worker, "main", run_worker)
     if fails:
         with pytest.raises(ConnectionError, match="worker startup failed"):
             await worker.main()
+        register.assert_not_called()
+        unregister.assert_not_called()
     else:
         async with asyncio.timeout(2):
             task = asyncio.create_task(worker.main())
@@ -95,6 +107,7 @@ async def test_worker_shutdown_and_signal_cleanup(
                     task.cancel()
                     await asyncio.gather(task, return_exceptions=True)
         assert events == ["ready", "closed"]
-    assert register.call_count == 2
-    unregister.assert_any_call(signal.SIGINT)
-    unregister.assert_any_call(signal.SIGTERM)
+        assert register.call_count == 2
+        unregister.assert_any_call(signal.SIGINT)
+        unregister.assert_any_call(signal.SIGTERM)
+        redis_client.close.assert_awaited_once_with(close_connection_pool=True)
